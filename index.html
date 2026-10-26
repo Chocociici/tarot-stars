@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Звёзды и Таро</title>
+    
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --void-black: #000000;
+            --deep-purple: #0f0b1a;
+            --article-purple: #1a103c;
+            --glow-violet: #7c5cbf;
+            --star-white: #f0eaff;
+            --text-muted: #b8aed6;
+            --accent-magenta: #c77dff;
+            --heart-pink: #ff6b9d;
+            --warn-pink: #ff4d8d;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: var(--void-black);
+            color: var(--star-white);
+            overflow-x: hidden;
+        }
+
+        /* ========== СЕКЦИЯ 1 ========== */
+        .hero-section {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            min-height: 500px;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .hero-gif {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+
+        .hero-gif.visible { opacity: 1; }
+
+        .hero-title-overlay {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            padding: 2rem;
+            cursor: pointer;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            will-change: opacity, transform;
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        .hero-title-overlay h1 {
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: 200;
+            letter-spacing: 10px;
+            text-transform: uppercase;
+            text-shadow: 0 0 40px rgba(124, 92, 191, 0.8);
+            margin-bottom: 1rem;
+        }
+
+        .hero-title-overlay p {
+            font-size: 1rem;
+            color: var(--text-muted);
+            letter-spacing: 4px;
+            animation: pulse-hint 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-hint {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .hero-title-overlay.hidden {
+            opacity: 0 !important;
+            transform: translateY(80px) scale(0.9) !important;
+            pointer-events: none;
+        }
+
+        /* ========== СЕКЦИЯ 2: СТАТЬИ ========== */
+        .articles-section {
+            background: linear-gradient(180deg, #000000 0%, var(--article-purple) 30%, var(--deep-purple) 100%);
+            padding: 5rem 2rem;
+            position: relative;
+        }
+
+        .section-divider {
+            text-align: center;
+            margin: 3rem 0;
+            opacity: 0.6;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .section-divider img {
+            width: 20px;
+            height: 20px;
+            filter: drop-shadow(0 0 6px var(--glow-violet));
+        }
+
+        /* ====== ОБЩИЙ ПУЗЫРЬ ДЛЯ ТЕКСТА И ГИФКИ ====== */
+        .article-bubble {
+            max-width: 1100px;
+            margin: 0 auto 6rem auto;
+            position: relative;
+            border-radius: 24px;
+            border: 1px solid rgba(124, 92, 191, 0.4);
+            background: linear-gradient(135deg, rgba(26, 16, 60, 0.6), rgba(15, 11, 26, 0.4));
+            box-shadow: 0 0 40px rgba(124, 92, 191, 0.15), inset 0 0 30px rgba(124, 92, 191, 0.05);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            align-items: stretch;
+            min-height: 380px;
+        }
+
+        .article-bubble.reverse {
+            direction: rtl;
+        }
+        .article-bubble.reverse > * {
+            direction: ltr;
+        }
+
+        /* Текст внутри пузыря */
+        .article-bubble .article-text {
+            position: relative;
+            padding: 2.5rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .article-bubble .article-text::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 1.2rem;
+            height: 1.2rem;
+            background: url('star.svg') no-repeat center / contain;
+            opacity: 0.7;
+        }
+
+        .article-bubble .article-text h2 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            color: var(--star-white);
+            text-shadow: 0 0 20px rgba(124, 92, 191, 0.4);
+        }
+
+        .article-bubble .article-text p {
+            line-height: 1.9;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        /* Изображение внутри пузыря */
+        .article-bubble .article-image {
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+        }
+
+        .article-bubble .article-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .article-bubble:hover .article-image img {
+            transform: scale(1.05);
+        }
+
+        /* ========== ЗВЁЗДЫ-КНОПКИ ========== */
+        .star-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(199, 125, 255, 0.4), rgba(124, 92, 191, 0.1));
+            border: 1px solid var(--accent-magenta);
+            cursor: pointer;
+            position: relative;
+            vertical-align: middle;
+            margin: 0 4px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(199, 125, 255, 0.3);
+            overflow: visible;
+        }
+
+        .star-btn img {
+            width: 16px;
+            height: 16px;
+            filter: drop-shadow(0 0 4px rgba(199, 125, 255, 0.9));
+            transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+
+        .star-btn:hover {
+            box-shadow: 0 0 25px rgba(199, 125, 255, 0.8);
+            transform: scale(1.15);
+        }
+
+        .star-btn .hidden-text {
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            background: rgba(10, 6, 18, 0.98);
+            border: 1px solid var(--accent-magenta);
+            border-radius: 12px;
+            padding: 12px 18px;
+            min-width: 240px;
+            max-width: 320px;
+            font-size: 0.85rem;
+            color: var(--star-white);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            line-height: 1.5;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(199, 125, 255, 0.4);
+            font-family: 'Segoe UI', sans-serif;
+            letter-spacing: 0;
+            font-weight: normal;
+        }
+
+        .star-btn.active .hidden-text {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            pointer-events: auto;
+        }
+
+        /* Слой для падающих звёзд */
+        .falling-stars-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            overflow: hidden;
+        }
+
+        .falling-star {
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            will-change: transform, opacity;
+        }
+
+        .falling-star img {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 0 8px rgba(199, 125, 255, 0.9));
+        }
+
+        /* ========== МИКРО-КАРТЫ ========== */
+        .micro-cards {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .micro-card {
+            perspective: 800px;
+            width: 110px;
+            height: 170px;
+            cursor: pointer;
+        }
+
+        .micro-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+
+        .micro-card.flipped .micro-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .micro-card-front,
+        .micro-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--glow-violet);
+        }
+
+        .micro-card-front {
+            background: linear-gradient(145deg, #1a103c, #0a0612);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 15px rgba(124, 92, 191, 0.3);
+        }
+
+        .micro-card-front img {
+            width: 30px;
+            height: 30px;
+            opacity: 0.6;
+        }
+
+        .micro-card-back {
+            transform: rotateY(180deg);
+            background: #000;
+        }
+
+        .micro-card-back img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ========== СЕКЦИЯ 3: ФИНАЛ ========== */
+        .final-section {
+            min-height: 100vh;
+            background: linear-gradient(180deg, var(--deep-purple) 0%, #0a0612 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .final-section h2 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 2rem;
+            color: var(--star-white);
+        }
+
+        .final-section p.question {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            line-height: 1.8;
+        }
+
+        /* ПОЛЕ С СЕРДЕЧКАМИ */
+        .password-wrapper {
+            position: relative;
+            margin-bottom: 3rem;
+        }
+
+        .heart-field {
+            background: rgba(15, 11, 26, 0.8);
+            border: 1px solid var(--accent-magenta);
+            border-radius: 40px;
+            padding: 16px 30px;
+            color: transparent;
+            font-size: 1.2rem;
+            width: 320px;
+            max-width: 80vw;
+            outline: none;
+            transition: all 0.4s ease;
+            text-align: center;
+            letter-spacing: 8px;
+            box-shadow: 0 0 20px rgba(199, 125, 255, 0.2);
+            caret-color: var(--heart-pink);
+            font-family: monospace;
+        }
+
+        .heart-field:focus {
+            box-shadow: 0 0 40px rgba(199, 125, 255, 0.5);
+            border-color: #ffd6ff;
+        }
+
+        .heart-display {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            font-size: 1.4rem;
+            letter-spacing: 6px;
+            color: var(--heart-pink);
+            text-shadow: 0 0 15px rgba(255, 107, 157, 0.8);
+            white-space: nowrap;
+        }
+
+        /* КАРТА ТАРО */
+        .tarot-reveal-container {
+            perspective: 1200px;
+            width: 300px;
+            height: 500px;
+            margin-top: 2rem;
+            position: relative;
+        }
+
+        .tarot-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .tarot-reveal-container.flipped .tarot-card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .tarot-front, .tarot-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tarot-front {
+            background: linear-gradient(145deg, #1a103c, #0a0612);
+            border: 2px solid var(--glow-violet);
+            box-shadow: 0 0 40px rgba(124, 92, 191, 0.4);
+        }
+
+        .tarot-front img {
+            width: 60px;
+            height: 60px;
+            opacity: 0.5;
+        }
+
+        .tarot-back {
+            background: transparent;
+            border: none;
+            transform: rotateY(180deg);
+            overflow: visible;
+        }
+
+        .tarot-back img {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            object-fit: contain;
+            display: block;
+            filter: drop-shadow(0 0 30px rgba(199, 125, 255, 0.6));
+        }
+
+        @keyframes shake-warn {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-8px); }
+            40% { transform: translateX(8px); }
+            60% { transform: translateX(-6px); }
+            80% { transform: translateX(6px); }
+            100% { transform: translateX(0); }
+        }
+
+        @keyframes glow-warn {
+            0%, 100% { box-shadow: 0 0 40px rgba(124, 92, 191, 0.4); }
+            50% { box-shadow: 0 0 80px rgba(255, 77, 141, 0.9), 0 0 120px rgba(255, 77, 141, 0.6); border-color: var(--warn-pink); }
+        }
+
+        .tarot-reveal-container.warn .tarot-card-inner {
+            animation: shake-warn 0.5s ease;
+        }
+
+        .tarot-reveal-container.warn .tarot-front {
+            animation: glow-warn 1s ease;
+        }
+
+        .warn-message {
+            position: absolute;
+            top: -50px;
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            background: rgba(255, 77, 141, 0.15);
+            border: 1px solid var(--warn-pink);
+            border-radius: 15px;
+            padding: 10px 20px;
+            color: var(--warn-pink);
+            font-size: 1rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(255, 77, 141, 0.8);
+            box-shadow: 0 0 20px rgba(255, 77, 141, 0.3);
+        }
+
+        .tarot-reveal-container.warn .warn-message {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+
+        .name-reveal {
+            position: absolute;
+            bottom: -70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            transition: all 0.8s ease 0.6s;
+            font-size: 1.5rem;
+            letter-spacing: 6px;
+            color: var(--accent-magenta);
+            text-shadow: 0 0 20px rgba(199, 125, 255, 0.8);
+            white-space: nowrap;
+        }
+
+        .tarot-reveal-container.flipped .name-reveal {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Кнопка «Рассмотреть» */
+        .inspect-btn {
+            margin-top: 4rem;
+            padding: 12px 30px;
+            background: transparent;
+            border: 1px solid var(--glow-violet);
+            color: var(--star-white);
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(124, 92, 191, 0.5);
+        }
+
+        .inspect-btn:hover {
+            background: rgba(124, 92, 191, 0.2);
+            box-shadow: 0 0 25px rgba(124, 92, 191, 0.6);
+        }
+
+        /* МОДАЛЬНОЕ ОКНО */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(5, 3, 10, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            position: relative;
+            max-width: 90vw;
+            max-height: 85vh;
+            perspective: 1000px;
+        }
+
+        .modal-image-wrapper {
+            width: 60vw;
+            max-width: 500px;
+            transition: transform 0.1s ease-out;
+            transform-style: preserve-3d;
+        }
+
+        .modal-image-wrapper img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 20px;
+            box-shadow: 0 0 80px rgba(199, 125, 255, 0.5);
+            pointer-events: none;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: -50px; right: 0;
+            background: transparent;
+            border: 1px solid var(--glow-violet);
+            color: var(--star-white);
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(124, 92, 191, 0.3);
+            box-shadow: 0 0 20px rgba(124, 92, 191, 0.6);
+        }
+
+        /* ========== АДАПТИВ ========== */
+        @media (max-width: 900px) {
+            .article-bubble {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto;
+                min-height: auto;
+                padding-top: 220px; /* место под гифку сверху */
+            }
+
+            /* Гифка сверху, но текст наполовину перекрывает */
+            .article-bubble .article-image {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 300px;
+                z-index: 0;
+            }
+
+            /* Текст поверх с подложкой, сдвинут вниз */
+            .article-bubble .article-text {
+                position: relative;
+                z-index: 2;
+                margin-top: 140px;
+                background: rgba(10, 6, 18, 0.85);
+                backdrop-filter: blur(12px);
+                border-radius: 20px;
+                border: 1px solid rgba(124, 92, 191, 0.5);
+                box-shadow: 0 0 30px rgba(124, 92, 191, 0.3);
+                padding: 1.8rem 1.5rem;
+            }
+
+            .article-bubble.reverse .article-image {
+                /* направление не влияет на абсолютное позиционирование */
+            }
+        }
+
+        @media (max-width: 600px) {
+            .hero-title-overlay h1 { letter-spacing: 4px; }
+            .star-btn .hidden-text {
+                min-width: 180px;
+                font-size: 0.8rem;
+            }
+            .tarot-reveal-container {
+                width: 240px;
+                height: 400px;
+            }
+            .micro-card {
+                width: 90px;
+                height: 140px;
+            }
+            .modal-image-wrapper {
+                width: 85vw;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Слой для падающих звёзд -->
+    <div class="falling-stars-layer" id="fallingStarsLayer"></div>
+
+    <!-- ========== СЕКЦИЯ 1 ========== -->
+    <section class="hero-section">
+        <img src="gif1.gif" alt="Черная дыра" class="hero-gif" id="heroGif">
+        <div class="hero-title-overlay" id="heroTitle">
+            <h1>Звёзды и Таро</h1>
+            <p>нажми, чтобы продолжить</p>
+        </div>
+    </section>
+
+    <!-- ========== СЕКЦИЯ 2: СТАТЬИ ========== -->
+    <section class="articles-section">
+        
+        <div class="section-divider">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+        </div>
+
+        <!-- Статья 1: ОБЩИЙ ПУЗЫРЬ -->
+        <div class="article-bubble" data-aos="fade-up" data-aos-duration="1000">
+            <div class="article-text">
+                <h2>Я не эксперт, но я верю в звёзды</h2>
+                <p>
+                    Мои познания в Таро слабы. Я не знаю всех арканов наизусть и не могу читать расклады с закрытыми глазами. 
+                    Но я верю в <span class="star-btn" data-tooltip="Не удачу, а закономерность. Если долго смотреть на небо, можно заметить ритм."><img src="star.svg" alt="★"></span> теорию вероятности. 
+                    И ещё я верю, что карты создавались, глядя на звёзды.
+                </p>
+                <p>
+                    Посмотри на карту Звезды. Женщина у воды. Одна нога на земле, другая — в <span class="star-btn" data-tooltip="Не просто вода. Это то, что отражает небо, но не является им."><img src="star.svg" alt="★"></span> глубине. 
+                    Над головой — одна большая звезда и семь малых. Это не случайность. Это <span class="star-btn" data-tooltip="Семь — число, которое повторяется во всех культурах: семь дней, семь чакр, семь сестёр."><img src="star.svg" alt="★"></span> код, который старше нас.
+                </p>
+            </div>
+            <div class="article-image">
+                <img src="gif2.gif" alt="Карта Звезда">
+            </div>
+        </div>
+
+        <div class="section-divider">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+        </div>
+
+        <!-- Статья 2: ОБЩИЙ ПУЗЫРЬ (реверс) -->
+        <div class="article-bubble reverse" data-aos="fade-up" data-aos-duration="1000">
+            <div class="article-text">
+                <h2>Карты рисовали, глядя на небо</h2>
+                <p>
+                    В XV веке, когда появились первые колоды Таро, астрономия и астрология были <span class="star-btn" data-tooltip="Не суеверие, а наука о закономерностях небесных тел."><img src="star.svg" alt="★"></span> одним целым. 
+                    Художники не придумывали символы из головы. Они смотрели на созвездия и переносили их на картон.
+                </p>
+                <p>
+                    Восемь лучей на Звезде — это не просто декор. Это <span class="star-btn" data-tooltip="Восемь — бесконечность, если перевернуть. Или баланс между двумя мирами."><img src="star.svg" alt="★"></span> число, 
+                    которое встречается в орнаментах всех культур. От византийских мозаик до кельтских узлов. 
+                    <span class="star-btn" data-tooltip="Совпадение? Возможно. Но совпадения — это тоже вероятность."><img src="star.svg" alt="★"></span> Совпадение?
+                </p>
+            </div>
+            <div class="article-image">
+                <img src="gif3.gif" alt="Звёздное небо">
+            </div>
+        </div>
+
+        <div class="section-divider">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+        </div>
+
+        <!-- Статья 3: ОБЩИЙ ПУЗЫРЬ + микро-карты -->
+        <div class="article-bubble" data-aos="fade-up" data-aos-duration="1000">
+            <div class="article-text">
+                <h2>Параллели из прошлого</h2>
+                <p>
+                    Я не верю в магию. Но я верю в <span class="star-btn" data-tooltip="Не мистика, а память. То, что повторяется, оставляет след."><img src="star.svg" alt="★"></span> память. 
+                    Люди тысячи лет смотрели на одни и те же звёзды. И рисовали одни и те же символы. 
+                    Звезда, Луна, Солнце — они есть в каждой культуре, у каждого народа.
+                </p>
+                <p>
+                    В Таро Звезда стоит после Башни. После <span class="star-btn" data-tooltip="Не конец. Просто момент, когда всё рушится, чтобы освободить место."><img src="star.svg" alt="★"></span> разрушения. 
+                    Это не награда. Это <span class="star-btn" data-tooltip="Тихий вдох. Не эйфория, а облегчение."><img src="star.svg" alt="★"></span> первый вдох после бури. 
+                    И это тоже вероятность. Вероятность того, что после плохого наступает хорошее. 
+                    Не потому что магия. А потому что <span class="star-btn" data-tooltip="Всё циклично. Всё возвращается. Даже свет."><img src="star.svg" alt="★"></span> цикл.
+                </p>
+
+                <div class="micro-cards">
+                    <div class="micro-card" title="Звезда">
+                        <div class="micro-card-inner">
+                            <div class="micro-card-front"><img src="star.svg" alt="★"></div>
+                            <div class="micro-card-back"><img src="png1.jpg" alt="Карта Звезда"></div>
+                        </div>
+                    </div>
+                    <div class="micro-card" title="Луна">
+                        <div class="micro-card-inner">
+                            <div class="micro-card-front"><img src="star.svg" alt="★"></div>
+                            <div class="micro-card-back"><img src="png2.jpg" alt="Карта Луна"></div>
+                        </div>
+                    </div>
+                    <div class="micro-card" title="Солнце">
+                        <div class="micro-card-inner">
+                            <div class="micro-card-front"><img src="star.svg" alt="★"></div>
+                            <div class="micro-card-back"><img src="png3.jpg" alt="Карта Солнце"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="article-image">
+                <img src="gif4.gif" alt="Параллели">
+            </div>
+        </div>
+
+        <div class="section-divider">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+            <img src="star.svg" alt="">
+        </div>
+    </section>
+
+    <!-- ========== СЕКЦИЯ 3: ФИНАЛ ========== -->
+    <section class="final-section">
+        <h2 data-aos="fade-up" data-aos-duration="1000">Последний вопрос</h2>
+        
+        <p class="question" data-aos="fade-up" data-aos-duration="1000">
+            Ты знаешь, что среди всего этого, здесь есть только настоящая звезда?<br>
+            Введи её имя, и я покажу тебе её.
+        </p>
+
+        <div class="password-wrapper" data-aos="fade-up" data-aos-duration="1000">
+            <input type="text" class="heart-field" id="nameInput" placeholder="" aria-label="Имя звезды" autocomplete="off">
+            <div class="heart-display" id="heartDisplay"></div>
+        </div>
+
+        <div class="tarot-reveal-container" id="tarotContainer" data-aos="fade-up" data-aos-duration="1000">
+            <div class="warn-message">а-а-а! сначала угадай</div>
+            <div class="tarot-card-inner">
+                <div class="tarot-front"><img src="star.svg" alt="★"></div>
+                <div class="tarot-back">
+                    <img src="taro.png" alt="Карта Таро Звезда">
+                </div>
+            </div>
+            <div class="name-reveal">Элеонора</div>
+        </div>
+
+        <button class="inspect-btn" id="inspectBtn">Рассмотреть</button>
+    </section>
+
+    <!-- МОДАЛЬНОЕ ОКНО -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">✕</button>
+            <div class="modal-image-wrapper" id="modalImageWrapper">
+                <img src="taro.png" alt="Карта Таро Звезда крупным планом">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ once: true, offset: 100 });
+
+        // ==== ЗАГОЛОВОК ====
+        const heroTitle = document.getElementById('heroTitle');
+        const heroGif = document.getElementById('heroGif');
+        heroTitle.addEventListener('click', () => {
+            heroTitle.style.opacity = '';
+            heroTitle.style.transform = '';
+            heroTitle.classList.add('hidden');
+            heroGif.classList.add('visible');
+        });
+
+        // ==== ПАДАЮЩИЕ ЗВЁЗДЫ ====
+        const fallingLayer = document.getElementById('fallingStarsLayer');
+        const MAX_STARS = 15;
+        let activeStars = 0;
+
+        function spawnFallingStar(x, y) {
+            if (activeStars >= MAX_STARS) return;
+            activeStars++;
+
+            const star = document.createElement('div');
+            star.className = 'falling-star';
+            const startX = x + (Math.random() - 0.5) * 60;
+            star.style.left = startX + 'px';
+            star.style.top = y + 'px';
+            star.innerHTML = '<img src="star.svg" alt="★">';
+            
+            const scale = 0.6 + Math.random() * 0.8;
+            star.style.transform = `scale(${scale})`;
+            
+            fallingLayer.appendChild(star);
+
+            const duration = 1200 + Math.random() * 800;
+            const drift = (Math.random() - 0.5) * 150;
+            
+            const animation = star.animate([
+                { transform: `translate(0, 0) scale(${scale}) rotate(0deg)`, opacity: 1 },
+                { transform: `translate(${drift}px, 400px) scale(${scale * 0.3}) rotate(${drift * 0.5}deg)`, opacity: 0 }
+            ], {
+                duration: duration,
+                easing: 'cubic-bezier(0.4, 0, 0.8, 1)',
+                fill: 'forwards'
+            });
+
+            animation.onfinish = () => {
+                star.remove();
+                activeStars--;
+                
+                const newX = Math.random() * (window.innerWidth - 40);
+                const newY = Math.random() * (window.innerHeight - 100);
+                spawnGhostStar(newX, newY);
+            };
+        }
+
+        function spawnGhostStar(x, y) {
+            if (activeStars >= MAX_STARS) return;
+            activeStars++;
+
+            const star = document.createElement('div');
+            star.className = 'falling-star';
+            star.style.left = x + 'px';
+            star.style.top = y + 'px';
+            star.innerHTML = '<img src="star.svg" alt="★">';
+            
+            const scale = 0.4 + Math.random() * 0.5;
+            fallingLayer.appendChild(star);
+
+            star.animate([
+                { transform: `scale(0)`, opacity: 0 },
+                { transform: `scale(${scale})`, opacity: 1, offset: 0.3 },
+                { transform: `scale(${scale})`, opacity: 1, offset: 0.8 },
+                { transform: `scale(0)`, opacity: 0 }
+            ], {
+                duration: 2000,
+                easing: 'ease-out'
+            }).onfinish = () => {
+                star.remove();
+                activeStars--;
+            };
+        }
+
+        // ==== ЗВЁЗДЫ-КНОПКИ ====
+        document.querySelectorAll('.star-btn').forEach(star => {
+            const tooltipText = star.getAttribute('data-tooltip');
+            const hiddenDiv = document.createElement('span');
+            hiddenDiv.className = 'hidden-text';
+            hiddenDiv.textContent = tooltipText;
+            star.appendChild(hiddenDiv);
+
+            star.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.star-btn.active').forEach(s => {
+                    if (s !== star) s.classList.remove('active');
+                });
+                star.classList.toggle('active');
+
+                const rect = star.getBoundingClientRect();
+                const x = rect.left + rect.width / 2;
+                const y = rect.top + rect.height / 2;
+                spawnFallingStar(x, y);
+            });
+        });
+
+        document.addEventListener('click', () => {
+            document.querySelectorAll('.star-btn.active').forEach(s => s.classList.remove('active'));
+        });
+
+        // ==== МИКРО-КАРТЫ ====
+        document.querySelectorAll('.micro-card').forEach(card => {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                card.classList.toggle('flipped');
+            });
+        });
+
+        // ==== СЕРДЕЧКИ + ПАРОЛЬ ====
+        const input = document.getElementById('nameInput');
+        const heartDisplay = document.getElementById('heartDisplay');
+        const container = document.getElementById('tarotContainer');
+        const correctName = 'элеонора';
+
+        input.addEventListener('input', (e) => {
+            const value = e.target.value;
+            heartDisplay.textContent = '♥'.repeat(value.length);
+            if (value.trim().toLowerCase() === correctName) {
+                container.classList.add('flipped');
+                container.classList.remove('warn');
+            } else {
+                container.classList.remove('flipped');
+            }
+        });
+
+        container.addEventListener('click', () => {
+            if (container.classList.contains('flipped')) return;
+            container.classList.add('warn');
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            setTimeout(() => container.classList.remove('warn'), 1500);
+        });
+
+        // ==== МОДАЛЬНОЕ ОКНО ====
+        const inspectBtn = document.getElementById('inspectBtn');
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalClose = document.getElementById('modalClose');
+        const modalImageWrapper = document.getElementById('modalImageWrapper');
+
+        inspectBtn.addEventListener('click', () => modalOverlay.classList.add('active'));
+        modalClose.addEventListener('click', () => {
+            modalOverlay.classList.remove('active');
+            modalImageWrapper.style.transform = 'rotateX(0) rotateY(0)';
+        });
+
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                modalOverlay.classList.remove('active');
+                modalImageWrapper.style.transform = 'rotateX(0) rotateY(0)';
+            }
+        });
+
+        modalOverlay.addEventListener('mousemove', (e) => {
+            if (!modalOverlay.classList.contains('active')) return;
+            const rect = modalOverlay.getBoundingClientRect();
+            const x = (e.clientX - rect.left) / rect.width - 0.5;
+            const y = (e.clientY - rect.top) / rect.height - 0.5;
+            modalImageWrapper.style.transform = `rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translate(${x * 15}px, ${y * 15}px)`;
+        });
+
+        modalOverlay.addEventListener('mouseleave', () => {
+            modalImageWrapper.style.transform = 'rotateX(0) rotateY(0) translate(0, 0)';
+        });
+
+        modalOverlay.addEventListener('touchmove', (e) => {
+            if (!modalOverlay.classList.contains('active')) return;
+            const touch = e.touches[0];
+            const rect = modalOverlay.getBoundingClientRect();
+            const x = (touch.clientX - rect.left) / rect.width - 0.5;
+            const y = (touch.clientY - rect.top) / rect.height - 0.5;
+            modalImageWrapper.style.transform = `rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translate(${x * 15}px, ${y * 15}px)`;
+        }, { passive: true });
+    </script>
+</body>
+</html>
