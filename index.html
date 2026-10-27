@@ -1,1027 +1,977 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Звёзды и Таро</title>
-    
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
-    <style>
-        :root {
-            --void-black: #000000;
-            --deep-purple: #0f0b1a;
-            --article-purple: #1a103c;
-            --glow-violet: #7c5cbf;
-            --star-white: #f0eaff;
-            --text-muted: #b8aed6;
-            --accent-magenta: #c77dff;
-            --heart-pink: #ff6b9d;
-            --warn-pink: #ff4d8d;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: var(--void-black);
-            color: var(--star-white);
-            overflow-x: hidden;
-        }
-
-        /* ========== СЕКЦИЯ 1 ========== */
-        .hero-section {
-            position: relative;
-            width: 100%;
-            height: 100vh;
-            min-height: 500px;
-            background: #000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .hero-gif {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            opacity: 0;
-            transition: opacity 1.2s ease;
-        }
-
-        .hero-gif.visible { opacity: 1; }
-
-        .hero-title-overlay {
-            position: relative;
-            z-index: 10;
-            text-align: center;
-            padding: 2rem;
-            cursor: pointer;
-            transition: opacity 0.8s ease, transform 0.8s ease;
-            will-change: opacity, transform;
-            opacity: 1;
-            transform: translateY(0) scale(1);
-        }
-
-        .hero-title-overlay h1 {
-            font-size: clamp(2.5rem, 8vw, 5rem);
-            font-weight: 200;
-            letter-spacing: 10px;
-            text-transform: uppercase;
-            text-shadow: 0 0 40px rgba(124, 92, 191, 0.8);
-            margin-bottom: 1rem;
-        }
-
-        .hero-title-overlay p {
-            font-size: 1rem;
-            color: var(--text-muted);
-            letter-spacing: 4px;
-            animation: pulse-hint 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-hint {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .hero-title-overlay.hidden {
-            opacity: 0 !important;
-            transform: translateY(80px) scale(0.9) !important;
-            pointer-events: none;
-        }
-
-        /* ========== СЕКЦИЯ 2: СТАТЬИ ========== */
-        .articles-section {
-            background: linear-gradient(180deg, #000000 0%, var(--article-purple) 30%, var(--deep-purple) 100%);
-            padding: 5rem 2rem;
-            position: relative;
-        }
-
-        .section-divider {
-            text-align: center;
-            margin: 3rem 0;
-            opacity: 0.6;
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-
-        .section-divider img {
-            width: 20px;
-            height: 20px;
-            filter: drop-shadow(0 0 6px var(--glow-violet));
-        }
-
-        /* ====== ОБЩИЙ ПУЗЫРЬ ДЛЯ ТЕКСТА И ГИФКИ ====== */
-        .article-bubble {
-            max-width: 1100px;
-            margin: 0 auto 6rem auto;
-            position: relative;
-            border-radius: 24px;
-            border: 1px solid rgba(124, 92, 191, 0.4);
-            background: linear-gradient(135deg, rgba(26, 16, 60, 0.6), rgba(15, 11, 26, 0.4));
-            box-shadow: 0 0 40px rgba(124, 92, 191, 0.15), inset 0 0 30px rgba(124, 92, 191, 0.05);
-            overflow: hidden;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            align-items: stretch;
-            min-height: 380px;
-        }
-
-        .article-bubble.reverse {
-            direction: rtl;
-        }
-        .article-bubble.reverse > * {
-            direction: ltr;
-        }
-
-        /* Текст внутри пузыря */
-        .article-bubble .article-text {
-            position: relative;
-            padding: 2.5rem 2rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            z-index: 2;
-        }
-
-        .article-bubble .article-text::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            width: 1.2rem;
-            height: 1.2rem;
-            background: url('star.svg') no-repeat center / contain;
-            opacity: 0.7;
-        }
-
-        .article-bubble .article-text h2 {
-            font-size: 1.8rem;
-            font-weight: 300;
-            letter-spacing: 2px;
-            margin-bottom: 1.5rem;
-            color: var(--star-white);
-            text-shadow: 0 0 20px rgba(124, 92, 191, 0.4);
-        }
-
-        .article-bubble .article-text p {
-            line-height: 1.9;
-            color: var(--text-muted);
-            margin-bottom: 1rem;
-            font-size: 1rem;
-        }
-
-        /* Изображение внутри пузыря */
-        .article-bubble .article-image {
-            position: relative;
-            overflow: hidden;
-            min-height: 280px;
-        }
-
-        .article-bubble .article-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center;
-            display: block;
-            transition: transform 0.6s ease;
-        }
-
-        .article-bubble:hover .article-image img {
-            transform: scale(1.05);
-        }
-
-        /* ========== ЗВЁЗДЫ-КНОПКИ ========== */
-        .star-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(199, 125, 255, 0.4), rgba(124, 92, 191, 0.1));
-            border: 1px solid var(--accent-magenta);
-            cursor: pointer;
-            position: relative;
-            vertical-align: middle;
-            margin: 0 4px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 10px rgba(199, 125, 255, 0.3);
-            overflow: visible;
-        }
-
-        .star-btn img {
-            width: 16px;
-            height: 16px;
-            filter: drop-shadow(0 0 4px rgba(199, 125, 255, 0.9));
-            transition: transform 0.3s ease;
-            pointer-events: none;
-        }
-
-        .star-btn:hover {
-            box-shadow: 0 0 25px rgba(199, 125, 255, 0.8);
-            transform: scale(1.15);
-        }
-
-        .star-btn .hidden-text {
-            display: block;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.7);
-            background: rgba(10, 6, 18, 0.98);
-            border: 1px solid var(--accent-magenta);
-            border-radius: 12px;
-            padding: 12px 18px;
-            min-width: 240px;
-            max-width: 320px;
-            font-size: 0.85rem;
-            color: var(--star-white);
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            z-index: 100;
-            line-height: 1.5;
-            text-align: center;
-            box-shadow: 0 0 30px rgba(199, 125, 255, 0.4);
-            font-family: 'Segoe UI', sans-serif;
-            letter-spacing: 0;
-            font-weight: normal;
-        }
-
-        .star-btn.active .hidden-text {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-            pointer-events: auto;
-        }
-
-        /* Слой для падающих звёзд */
-        .falling-stars-layer {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 999;
-            overflow: hidden;
-        }
-
-        .falling-star {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            will-change: transform, opacity;
-        }
-
-        .falling-star img {
-            width: 100%;
-            height: 100%;
-            filter: drop-shadow(0 0 8px rgba(199, 125, 255, 0.9));
-        }
-
-        /* ========== МИКРО-КАРТЫ ========== */
-        .micro-cards {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-
-        .micro-card {
-            perspective: 800px;
-            width: 110px;
-            height: 170px;
-            cursor: pointer;
-        }
-
-        .micro-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-        }
-
-        .micro-card.flipped .micro-card-inner {
-            transform: rotateY(180deg);
-        }
-
-        .micro-card-front,
-        .micro-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 1px solid var(--glow-violet);
-        }
-
-        .micro-card-front {
-            background: linear-gradient(145deg, #1a103c, #0a0612);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 15px rgba(124, 92, 191, 0.3);
-        }
-
-        .micro-card-front img {
-            width: 30px;
-            height: 30px;
-            opacity: 0.6;
-        }
-
-        .micro-card-back {
-            transform: rotateY(180deg);
-            background: #000;
-        }
-
-        .micro-card-back img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-        }
-
-        /* ========== СЕКЦИЯ 3: ФИНАЛ ========== */
-        .final-section {
-            min-height: 100vh;
-            background: linear-gradient(180deg, var(--deep-purple) 0%, #0a0612 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 4rem 2rem;
-            text-align: center;
-        }
-
-        .final-section h2 {
-            font-size: 1.8rem;
-            font-weight: 300;
-            letter-spacing: 3px;
-            margin-bottom: 2rem;
-            color: var(--star-white);
-        }
-
-        .final-section p.question {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            margin-bottom: 3rem;
-            max-width: 600px;
-            line-height: 1.8;
-        }
-
-        /* ПОЛЕ С СЕРДЕЧКАМИ */
-        .password-wrapper {
-            position: relative;
-            margin-bottom: 3rem;
-        }
-
-        .heart-field {
-            background: rgba(15, 11, 26, 0.8);
-            border: 1px solid var(--accent-magenta);
-            border-radius: 40px;
-            padding: 16px 30px;
-            color: transparent;
-            font-size: 1.2rem;
-            width: 320px;
-            max-width: 80vw;
-            outline: none;
-            transition: all 0.4s ease;
-            text-align: center;
-            letter-spacing: 8px;
-            box-shadow: 0 0 20px rgba(199, 125, 255, 0.2);
-            caret-color: var(--heart-pink);
-            font-family: monospace;
-        }
-
-        .heart-field:focus {
-            box-shadow: 0 0 40px rgba(199, 125, 255, 0.5);
-            border-color: #ffd6ff;
-        }
-
-        .heart-display {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            font-size: 1.4rem;
-            letter-spacing: 6px;
-            color: var(--heart-pink);
-            text-shadow: 0 0 15px rgba(255, 107, 157, 0.8);
-            white-space: nowrap;
-        }
-
-        /* КАРТА ТАРО */
-        .tarot-reveal-container {
-            perspective: 1200px;
-            width: 300px;
-            height: 500px;
-            margin-top: 2rem;
-            position: relative;
-        }
-
-        .tarot-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-            cursor: pointer;
-        }
-
-        .tarot-reveal-container.flipped .tarot-card-inner {
-            transform: rotateY(180deg);
-        }
-
-        .tarot-front, .tarot-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .tarot-front {
-            background: linear-gradient(145deg, #1a103c, #0a0612);
-            border: 2px solid var(--glow-violet);
-            box-shadow: 0 0 40px rgba(124, 92, 191, 0.4);
-        }
-
-        .tarot-front img {
-            width: 60px;
-            height: 60px;
-            opacity: 0.5;
-        }
-
-        .tarot-back {
-            background: transparent;
-            border: none;
-            transform: rotateY(180deg);
-            overflow: visible;
-        }
-
-        .tarot-back img {
-            width: 100%;
-            height: auto;
-            max-height: 100%;
-            object-fit: contain;
-            display: block;
-            filter: drop-shadow(0 0 30px rgba(199, 125, 255, 0.6));
-        }
-
-        @keyframes shake-warn {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(-8px); }
-            40% { transform: translateX(8px); }
-            60% { transform: translateX(-6px); }
-            80% { transform: translateX(6px); }
-            100% { transform: translateX(0); }
-        }
-
-        @keyframes glow-warn {
-            0%, 100% { box-shadow: 0 0 40px rgba(124, 92, 191, 0.4); }
-            50% { box-shadow: 0 0 80px rgba(255, 77, 141, 0.9), 0 0 120px rgba(255, 77, 141, 0.6); border-color: var(--warn-pink); }
-        }
-
-        .tarot-reveal-container.warn .tarot-card-inner {
-            animation: shake-warn 0.5s ease;
-        }
-
-        .tarot-reveal-container.warn .tarot-front {
-            animation: glow-warn 1s ease;
-        }
-
-        .warn-message {
-            position: absolute;
-            top: -50px;
-            left: 50%;
-            transform: translateX(-50%) scale(0.8);
-            background: rgba(255, 77, 141, 0.15);
-            border: 1px solid var(--warn-pink);
-            border-radius: 15px;
-            padding: 10px 20px;
-            color: var(--warn-pink);
-            font-size: 1rem;
-            white-space: nowrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: all 0.3s ease;
-            text-shadow: 0 0 10px rgba(255, 77, 141, 0.8);
-            box-shadow: 0 0 20px rgba(255, 77, 141, 0.3);
-        }
-
-        .tarot-reveal-container.warn .warn-message {
-            opacity: 1;
-            transform: translateX(-50%) scale(1);
-        }
-
-        .name-reveal {
-            position: absolute;
-            bottom: -70px;
-            left: 50%;
-            transform: translateX(-50%) translateY(20px);
-            opacity: 0;
-            transition: all 0.8s ease 0.6s;
-            font-size: 1.5rem;
-            letter-spacing: 6px;
-            color: var(--accent-magenta);
-            text-shadow: 0 0 20px rgba(199, 125, 255, 0.8);
-            white-space: nowrap;
-        }
-
-        .tarot-reveal-container.flipped .name-reveal {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0);
-        }
-
-        /* Кнопка «Рассмотреть» */
-        .inspect-btn {
-            margin-top: 4rem;
-            padding: 12px 30px;
-            background: transparent;
-            border: 1px solid var(--glow-violet);
-            color: var(--star-white);
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 1rem;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-            text-shadow: 0 0 10px rgba(124, 92, 191, 0.5);
-        }
-
-        .inspect-btn:hover {
-            background: rgba(124, 92, 191, 0.2);
-            box-shadow: 0 0 25px rgba(124, 92, 191, 0.6);
-        }
-
-        /* МОДАЛЬНОЕ ОКНО */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(5, 3, 10, 0.95);
-            backdrop-filter: blur(8px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.4s ease;
-        }
-
-        .modal-overlay.active {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .modal-content {
-            position: relative;
-            max-width: 90vw;
-            max-height: 85vh;
-            perspective: 1000px;
-        }
-
-        .modal-image-wrapper {
-            width: 60vw;
-            max-width: 500px;
-            transition: transform 0.1s ease-out;
-            transform-style: preserve-3d;
-        }
-
-        .modal-image-wrapper img {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 20px;
-            box-shadow: 0 0 80px rgba(199, 125, 255, 0.5);
-            pointer-events: none;
-        }
-
-        .modal-close {
-            position: absolute;
-            top: -50px; right: 0;
-            background: transparent;
-            border: 1px solid var(--glow-violet);
-            color: var(--star-white);
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.2rem;
-            transition: all 0.3s ease;
-        }
-
-        .modal-close:hover {
-            background: rgba(124, 92, 191, 0.3);
-            box-shadow: 0 0 20px rgba(124, 92, 191, 0.6);
-        }
-
-        /* ========== АДАПТИВ ========== */
-        @media (max-width: 900px) {
-            .article-bubble {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto;
-                min-height: auto;
-                padding-top: 220px; /* место под гифку сверху */
-            }
-
-            /* Гифка сверху, но текст наполовину перекрывает */
-            .article-bubble .article-image {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 300px;
-                z-index: 0;
-            }
-
-            /* Текст поверх с подложкой, сдвинут вниз */
-            .article-bubble .article-text {
-                position: relative;
-                z-index: 2;
-                margin-top: 140px;
-                background: rgba(10, 6, 18, 0.85);
-                backdrop-filter: blur(12px);
-                border-radius: 20px;
-                border: 1px solid rgba(124, 92, 191, 0.5);
-                box-shadow: 0 0 30px rgba(124, 92, 191, 0.3);
-                padding: 1.8rem 1.5rem;
-            }
-
-            .article-bubble.reverse .article-image {
-                /* направление не влияет на абсолютное позиционирование */
-            }
-        }
-
-        @media (max-width: 600px) {
-            .hero-title-overlay h1 { letter-spacing: 4px; }
-            .star-btn .hidden-text {
-                min-width: 180px;
-                font-size: 0.8rem;
-            }
-            .tarot-reveal-container {
-                width: 240px;
-                height: 400px;
-            }
-            .micro-card {
-                width: 90px;
-                height: 140px;
-            }
-            .modal-image-wrapper {
-                width: 85vw;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Книга Судеб</title>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Marck+Script&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { overflow-x: hidden; }
+body {
+    font-family: 'Caveat', cursive;
+    min-height: 100vh;
+    background: linear-gradient(to bottom, #e3e1cf 0%, #cdcd97 100%);
+    background-attachment: fixed;
+    position: relative;
+}
+
+/* ===== КУСТЫ ===== */
+.bushes-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.bush { position: absolute; filter: blur(3px); }
+.bush.b1 { width: 500px; height: 500px; bottom: -240px; left: -220px; background: #d8b267; border-radius: 45% 55% 60% 40% / 50% 60% 40% 50%; }
+.bush.b2 { width: 320px; height: 320px; bottom: -140px; left: -100px; background: #d0a043; border-radius: 55% 45% 50% 50% / 60% 40% 60% 40%; }
+.bush.b3 { width: 550px; height: 550px; bottom: -260px; right: -240px; background: #d8b267; border-radius: 50% 50% 40% 60% / 55% 45% 55% 45%; }
+.bush.b4 { width: 340px; height: 340px; bottom: -160px; right: -120px; background: #d0a043; border-radius: 40% 60% 55% 45% / 45% 55% 45% 55%; }
+.bush.b5 { width: 420px; height: 220px; bottom: -100px; left: 50%; transform: translateX(-50%); background: #d8b267; border-radius: 50% 50% 40% 40% / 100% 100% 0 0; }
+.bush.b6 { width: 260px; height: 340px; top: 35%; left: -160px; background: #d0a043; border-radius: 50% 50% 60% 40% / 55% 45% 55% 45%; }
+.bush.b7 { width: 280px; height: 360px; top: 55%; right: -170px; background: #d0a043; border-radius: 45% 55% 40% 60% / 50% 50% 50% 50%; }
+.bush.b8 { width: 220px; height: 220px; top: 180px; right: -120px; background: #d8b267; border-radius: 55% 45% 50% 50% / 60% 40% 60% 40%; }
+.bush.b9 { width: 200px; height: 200px; top: 240px; left: -110px; background: #d8b267; border-radius: 45% 55% 55% 45% / 55% 45% 55% 45%; }
+
+/* ===== ШАПКА ===== */
+header {
+    background: #620f81;
+    box-shadow: 0 0 25px 4px #7b1796;
+    border: 2px solid #43045a;
+    position: sticky; top: 0; z-index: 100;
+    padding: 16px 24px;
+    display: flex; justify-content: center; align-items: center;
+    gap: 40px; flex-wrap: wrap;
+}
+header nav a {
+    color: #fff; text-decoration: none;
+    font-family: 'Marck Script', cursive;
+    font-size: 24px; padding: 4px 8px;
+    position: relative; cursor: pointer;
+    transition: color 0.3s, text-shadow 0.3s;
+}
+header nav a::after {
+    content: ''; position: absolute; left: 8px; right: 8px; bottom: -2px;
+    height: 2px; background: #ffd84d;
+    transform: scaleX(0); transform-origin: center;
+    transition: transform 0.35s ease;
+}
+header nav a:hover { color: #ffd84d; text-shadow: 0 0 12px rgba(255,216,77,0.7); }
+header nav a:hover::after { transform: scaleX(1); }
+
+/* ===== MAIN ===== */
+main {
+    position: relative; z-index: 2;
+    max-width: 1000px; margin: 0 auto;
+    padding: 30px 20px 50px;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 10px;
+}
+
+/* ===== SVG ===== */
+.svg-scene {
+    width: 100%; max-width: 380px;
+    aspect-ratio: 1/1; position: relative;
+    filter: drop-shadow(0 10px 30px rgba(99,50,7,0.35));
+}
+.svg-scene .frame {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain; display: none;
+}
+.svg-scene .frame.active { display: block; }
+
+/* ===== ОБЛОЖКА ===== */
+.book-stage {
+    width: 100%;
+    display: flex; justify-content: center;
+    align-items: flex-start;
+    perspective: 2600px;
+    min-height: 460px;
+    position: relative;
+    margin-top: -50px;
+}
+#bookCover {
+    width: 280px; max-width: 80vw;
+    cursor: pointer;
+    filter: drop-shadow(0 14px 30px rgba(0,0,0,0.45));
+    transition: transform 0.4s ease, filter 0.4s ease, opacity 0.6s;
+    transform-style: preserve-3d;
+}
+#bookCover:hover { transform: translateY(-6px) rotateY(-6deg) scale(1.02); filter: drop-shadow(0 20px 40px rgba(0,0,0,0.55)); }
+#bookCover.shake { animation: bookShake 0.7s cubic-bezier(.36,.07,.19,.97); }
+@keyframes bookShake {
+    0%, 100% { transform: translateX(0) rotateZ(0) scale(1); }
+    10% { transform: translateX(-10px) rotateZ(-4deg) scale(1.02); }
+    25% { transform: translateX(10px) rotateZ(4deg) scale(1.03); }
+    40% { transform: translateX(-8px) rotateZ(-3deg) scale(1.02); }
+    55% { transform: translateX(8px) rotateZ(3deg) scale(1.03); }
+    70% { transform: translateX(-5px) rotateZ(-2deg) scale(1.01); }
+    85% { transform: translateX(5px) rotateZ(2deg) scale(1.01); }
+    100% { transform: translateX(0) rotateZ(0) scale(1); }
+}
+#bookCover.opening { animation: bookOpenCover 1s ease-in forwards; }
+@keyframes bookOpenCover { to { opacity: 0; transform: scale(1.15) rotateY(60deg); } }
+
+/* ===== 3D КНИГА ===== */
+.book-3d {
+    display: none;
+    width: 100%; max-width: 860px;
+    height: 500px;
+    position: relative;
+    transform-style: preserve-3d;
+}
+.book-3d.visible { display: block; }
+
+.book-inner {
+    position: relative;
+    width: 100%; height: 100%;
+    display: flex;
+    background: linear-gradient(135deg, #8b6b47 0%, #a67c52 55%, #8b6b47 100%);
+    border-left: 7px solid #633207;
+    border-right: 7px solid #633207;
+    border-radius: 10px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.55), inset 0 0 60px rgba(0,0,0,0.25);
+    overflow: hidden;
+}
+.book-inner::before {
+    content: '';
+    position: absolute; left: 50%; top: 0; bottom: 0;
+    width: 40px; transform: translateX(-50%);
+    background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0) 100%);
+    pointer-events: none; z-index: 5;
+}
+
+.page-slot { position: relative; flex: 1; height: 100%; overflow: hidden; }
+
+.book-page {
+    position: absolute; inset: 0;
+    padding: 40px 32px 60px;
+    color: #fff;
+    font-family: 'Caveat', cursive;
+    font-size: 24px;
+    line-height: 1.55;
+    user-select: none;
+    overflow-y: auto;
+    background: linear-gradient(160deg, rgba(139,107,71,0.98), rgba(166,124,82,0.98));
+    display: flex; flex-direction: column; justify-content: center;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+}
+.book-page::before {
+    content: ''; position: absolute; inset: 12px;
+    border: 1px solid rgba(255,216,77,0.25);
+    border-radius: 6px; pointer-events: none;
+}
+.book-page.left-page { border-right: 1px solid rgba(99,50,7,0.4); transform-origin: right center; }
+.book-page.right-page { border-left: 1px solid rgba(99,50,7,0.4); transform-origin: left center; }
+.book-page.left-page::after,
+.book-page.right-page::after {
+    content: ''; position: absolute; top: 0; bottom: 0; width: 30px; pointer-events: none;
+}
+.book-page.left-page::after { right: 0; background: linear-gradient(to left, rgba(0,0,0,0.3), transparent); }
+.book-page.right-page::after { left: 0; background: linear-gradient(to right, rgba(0,0,0,0.3), transparent); }
+
+.flip-page {
+    position: absolute; top: 0; height: 100%; width: 50%;
+    z-index: 30; pointer-events: none;
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+    border-radius: 4px;
+    box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+.flip-page .book-page {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    padding: 40px 32px 60px; font-size: 24px; line-height: 1.55;
+    display: flex; flex-direction: column; justify-content: center;
+    background: linear-gradient(160deg, rgba(139,107,71,0.98), rgba(166,124,82,0.98));
+    color: #fff;
+}
+.flip-page.flip-right { right: 0; transform-origin: left center; }
+.flip-page.flip-left { left: 0; transform-origin: right center; }
+
+/* кликабельные слова */
+.owl-word, .croc-word {
+    font-weight: 700; cursor: pointer;
+    display: inline-block; position: relative;
+    font-family: 'Marck Script', cursive;
+    transition: text-shadow 0.3s, transform 0.3s;
+}
+.owl-word { color: #ffd84d; text-shadow: 0 0 10px rgba(255,216,77,0.7); }
+.owl-word:hover { text-shadow: 0 0 22px rgba(255,216,77,1), 0 0 40px rgba(255,216,77,0.8); transform: scale(1.08); }
+.croc-word { color: #7ed957; text-shadow: 0 0 10px rgba(126,217,87,0.7); }
+.croc-word:hover { text-shadow: 0 0 22px rgba(126,217,87,1), 0 0 40px rgba(126,217,87,0.8); transform: scale(1.08); }
+
+.book-toolbar {
+    position: absolute; bottom: 12px; left: 0; right: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 22px; z-index: 10; pointer-events: none;
+}
+.book-toolbar > * { pointer-events: auto; }
+.book-toolbar button {
+    background: rgba(255,216,77,0.15);
+    border: 1.5px solid rgba(255,216,77,0.6);
+    color: #ffd84d; width: 44px; height: 44px;
+    border-radius: 50%; cursor: pointer; font-size: 22px;
+    font-family: inherit; transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.book-toolbar button:hover { background: rgba(255,216,77,0.35); box-shadow: 0 0 18px rgba(255,216,77,0.7); transform: scale(1.08); }
+.book-toolbar button:disabled { opacity: 0.3; cursor: default; }
+.book-toolbar button:disabled:hover { transform: none; box-shadow: none; }
+.page-indicator {
+    font-family: 'Caveat', cursive; color: #ffd84d;
+    font-size: 20px; letter-spacing: 1px;
+    text-shadow: 0 0 8px rgba(0,0,0,0.5);
+}
+.book-close-btn {
+    position: absolute; top: 12px; right: 14px; z-index: 20;
+    background: rgba(255,216,77,0.15);
+    border: 1.5px solid rgba(255,216,77,0.6);
+    color: #ffd84d; width: 38px; height: 38px;
+    border-radius: 50%; cursor: pointer; font-size: 18px;
+    transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+}
+.book-close-btn:hover { background: rgba(255,216,77,0.35); transform: rotate(90deg) scale(1.1); box-shadow: 0 0 15px rgba(255,216,77,0.7); }
+
+/* ===== ЗВЁЗДЫ ===== */
+.star-particle {
+    position: fixed; pointer-events: none; z-index: 950;
+    will-change: transform, opacity;
+    text-shadow: 0 0 10px currentColor, 0 0 20px currentColor;
+}
+
+/* ===== ВЫЛЕТ КАРТЫ ===== */
+.card-flight-overlay {
+    position: fixed; inset: 0; z-index: 1200;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(20,5,30,0); pointer-events: none;
+    transition: background 0.6s;
+}
+.card-flight-overlay.reveal {
+    background: rgba(20,5,30,0.72);
+    pointer-events: auto;
+    backdrop-filter: blur(3px);
+}
+@keyframes cardEmergence {
+    0%   { opacity: 0; transform: scale(0.02) rotate(0deg); filter: brightness(3) blur(20px); }
+    8%   { opacity: 1; transform: scale(0.25) rotate(360deg); filter: brightness(2.4) blur(10px); }
+    33%  { transform: scale(0.5) rotate(720deg); filter: brightness(1.8) blur(4px); }
+    55%  { transform: scale(0.75) rotate(1080deg); filter: brightness(1.4) blur(1px); }
+    78%  { transform: scale(1.15) rotate(1080deg); filter: brightness(1.1) blur(0); }
+    90%  { transform: scale(0.96) rotate(1080deg); filter: brightness(1) blur(0); }
+    100% { opacity: 1; transform: scale(1) rotate(1080deg); filter: brightness(1) blur(0); }
+}
+.flight-card {
+    width: 260px; max-width: 72vw;
+    background: #fff; border-radius: 14px;
+    padding: 14px;
+    box-shadow: 0 0 60px rgba(255,216,77,0.8), 0 20px 60px rgba(0,0,0,0.6);
+    animation: cardEmergence 2.6s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+    position: relative;
+    transform: rotate(1080deg);
+    cursor: grab;
+}
+.flight-card.settled { animation: none; transform: scale(1) rotate(1080deg); opacity: 1; }
+.flight-card:active { cursor: grabbing; }
+.flight-card::before {
+    content: ''; position: absolute; inset: 5px;
+    border: 2px solid #e0d5b8; border-radius: 10px; pointer-events: none;
+}
+.flight-card img { width: 100%; height: auto; border-radius: 8px; display: block; pointer-events: none; }
+.card-actions {
+    position: absolute; bottom: -70px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 14px;
+    opacity: 0; transition: opacity 0.5s 0.2s;
+}
+.card-flight-overlay.reveal .card-actions { opacity: 1; }
+.card-actions button {
+    font-family: 'Caveat', cursive; font-size: 20px;
+    padding: 8px 26px; border-radius: 30px;
+    border: 2px solid #ffd84d;
+    background: rgba(98,15,129,0.85);
+    color: #ffd84d; cursor: pointer;
+    transition: all 0.3s;
+    backdrop-filter: blur(6px);
+}
+.card-actions button:hover {
+    background: #ffd84d; color: #43045a;
+    box-shadow: 0 0 25px rgba(255,216,77,0.9);
+    transform: translateY(-2px);
+}
+
+/* ===== СЕКЦИИ ===== */
+.section {
+    display: none;
+    position: relative; z-index: 2;
+    width: 100%; max-width: 1100px;
+    margin: 0 auto; padding: 20px 20px 60px;
+}
+.section.active { display: block; }
+.section h2 {
+    text-align: center;
+    font-family: 'Marck Script', cursive;
+    color: #43045a; font-size: 42px;
+    margin-bottom: 35px;
+    text-shadow: 0 2px 8px rgba(255,255,255,0.6);
+}
+
+/* ===== ГАЛЕРЕЯ ===== */
+.gallery-book {
+    background: linear-gradient(135deg, #8b6b47 0%, #a67c52 55%, #8b6b47 100%);
+    border-left: 8px solid #633207;
+    border-right: 8px solid #633207;
+    border-radius: 12px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.55), inset 0 0 60px rgba(0,0,0,0.25);
+    padding: 40px 30px;
+    position: relative;
+    overflow: hidden;
+}
+.gallery-book::before {
+    content: ''; position: absolute; left: 50%; top: 0; bottom: 0;
+    width: 40px; transform: translateX(-50%);
+    background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0) 100%);
+    pointer-events: none; z-index: 0;
+}
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 22px;
+    position: relative; z-index: 1;
+}
+.gallery-cell { display: flex; flex-direction: column; }
+.gallery-card {
+    position: relative;
+    background: #fff; border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.35);
+    aspect-ratio: 2/3;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+}
+.gallery-card.dark {
+    background: #2a1a10;
+    border: 2px solid #633207;
+}
+.gallery-card.dark::before {
+    content: '???';
+    font-family: 'Marck Script', cursive;
+    font-size: 32px;
+    color: #ffd84d;
+    text-shadow: 0 0 15px rgba(255,216,77,0.5);
+    letter-spacing: 4px;
+    z-index: 1;
+}
+.gallery-card.dark::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 50%, transparent 40%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+}
+.sticker {
+    position: absolute;
+    top: 8px; right: -18px;
+    background: #f4e4c1;
+    border: 1px dashed #633207;
+    padding: 4px 26px;
+    font-family: 'Caveat', cursive;
+    font-size: 16px;
+    color: #633207;
+    transform: rotate(35deg);
+    box-shadow: 2px 3px 8px rgba(0,0,0,0.3);
+    z-index: 3;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+.gallery-card img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; display: block; }
+.gallery-meaning {
+    font-family: 'Caveat', cursive;
+    font-size: 17px;
+    color: #fff;
+    text-align: center;
+    margin-top: 8px;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    line-height: 1.2;
+}
+
+/* ===== ОБО МНЕ ===== */
+.profile-wrap { display: flex; justify-content: center; }
+.profile-card {
+    background: rgba(255,255,255,0.55);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    padding: 40px 45px;
+    box-shadow: 0 20px 60px rgba(99,50,7,0.3);
+    border: 2px solid rgba(98,15,129,0.2);
+    display: flex; flex-direction: column;
+    align-items: center; gap: 28px;
+    max-width: 500px; width: 100%;
+}
+.profile-avatar {
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid #620f81;
+    box-shadow: 0 0 0 6px rgba(255,216,77,0.5), 0 10px 30px rgba(0,0,0,0.3);
+    background: #e3e1cf;
+}
+.profile-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.profile-fields { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+.profile-field { display: flex; flex-direction: column; gap: 4px; }
+.profile-field label {
+    font-family: 'Caveat', cursive;
+    font-size: 18px; color: #620f81;
+    font-weight: 700; letter-spacing: 0.5px;
+}
+.profile-field input {
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    padding: 10px 16px;
+    border: 2px solid rgba(98,15,129,0.3);
+    border-radius: 12px;
+    background: rgba(255,255,255,0.7);
+    color: #43045a;
+    transition: all 0.3s;
+    outline: none;
+}
+.profile-field input:focus {
+    border-color: #620f81;
+    box-shadow: 0 0 0 4px rgba(255,216,77,0.4);
+    background: #fff;
+}
+.profile-about {
+    width: 100%;
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    color: #43045a;
+    text-align: center;
+    line-height: 1.5;
+    padding: 20px;
+    background: rgba(255,216,77,0.2);
+    border-radius: 16px;
+    border: 1.5px dashed rgba(98,15,129,0.4);
+}
+
+/* ===== АДАПТИВ ===== */
+@media (max-width: 768px) {
+    header { gap: 22px; padding: 12px 16px; }
+    header nav a { font-size: 20px; }
+    .book-3d { height: 560px; }
+    .book-inner { flex-direction: column; }
+    .page-slot { height: 50%; flex: none; }
+    .book-inner::before {
+        left: 0; right: 0; top: 50%; bottom: auto;
+        width: 100%; height: 40px; transform: translateY(-50%);
+        background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0) 100%);
+    }
+    .book-page.right-page { border-left: none; border-top: 1px solid rgba(99,50,7,0.4); }
+    .book-page.left-page { border-right: none; border-bottom: 1px solid rgba(99,50,7,0.4); }
+    .book-page { padding: 46px 20px 66px; font-size: 20px; }
+    .flip-page { width: 100% !important; height: 50% !important; }
+    .flip-page.flip-right { right: auto; left: 0; top: 50%; transform-origin: center top; }
+    .flip-page.flip-left { left: 0; top: 0; transform-origin: center bottom; }
+    .flip-page .book-page { padding: 46px 20px 66px; font-size: 20px; }
+    .flight-card { width: 220px; }
+    .gallery-book { padding: 30px 18px; }
+    .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 14px; }
+    .gallery-card.dark::before { font-size: 22px; }
+    .sticker { font-size: 12px; padding: 3px 18px; right: -14px; }
+    .section h2 { font-size: 32px; }
+    .profile-card { padding: 28px 24px; }
+    .svg-scene { max-width: 280px; }
+    .book-stage { margin-top: -30px; }
+}
+@media (max-width: 480px) {
+    header { gap: 14px; }
+    header nav a { font-size: 17px; }
+    #bookCover { width: 200px; }
+    .book-3d { height: 600px; }
+    .book-page { font-size: 18px; padding: 42px 16px 62px; }
+    .flight-card { width: 180px; }
+    .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
+    .gallery-card.dark::before { font-size: 18px; letter-spacing: 2px; }
+    .profile-avatar { width: 110px; height: 110px; }
+    .profile-field input { font-size: 19px; }
+}
+</style>
 </head>
 <body>
 
-    <!-- Слой для падающих звёзд -->
-    <div class="falling-stars-layer" id="fallingStarsLayer"></div>
+<div class="bushes-bg">
+    <div class="bush b1"></div><div class="bush b2"></div><div class="bush b3"></div>
+    <div class="bush b4"></div><div class="bush b5"></div><div class="bush b6"></div>
+    <div class="bush b7"></div><div class="bush b8"></div><div class="bush b9"></div>
+</div>
 
-    <!-- ========== СЕКЦИЯ 1 ========== -->
-    <section class="hero-section">
-        <img src="gif1.gif" alt="Черная дыра" class="hero-gif" id="heroGif">
-        <div class="hero-title-overlay" id="heroTitle">
-            <h1>Звёзды и Таро</h1>
-            <p>нажми, чтобы продолжить</p>
-        </div>
-    </section>
+<header>
+    <nav><a data-section="main">Главная</a></nav>
+    <nav><a data-section="gallery">Галерея</a></nav>
+    <nav><a data-section="about">Обо мне</a></nav>
+</header>
 
-    <!-- ========== СЕКЦИЯ 2: СТАТЬИ ========== -->
-    <section class="articles-section">
-        
-        <div class="section-divider">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-        </div>
+<main id="mainView">
+    <div class="svg-scene" id="svgScene">
+        <img class="frame active" src="ikon1.svg" alt="Кадр 1">
+        <img class="frame" src="ikon2.svg" alt="Кадр 2">
+        <img class="frame" src="ikon3.svg" alt="Кадр 3">
+    </div>
 
-        <!-- Статья 1: ОБЩИЙ ПУЗЫРЬ -->
-        <div class="article-bubble" data-aos="fade-up" data-aos-duration="1000">
-            <div class="article-text">
-                <h2>Я не эксперт, но я верю в звёзды</h2>
-                <p>
-                    Мои познания в Таро слабы. Я не знаю всех арканов наизусть и не могу читать расклады с закрытыми глазами. 
-                    Но я верю в <span class="star-btn" data-tooltip="Не удачу, а закономерность. Если долго смотреть на небо, можно заметить ритм."><img src="star.svg" alt="★"></span> теорию вероятности. 
-                    И ещё я верю, что карты создавались, глядя на звёзды.
-                </p>
-                <p>
-                    Посмотри на карту Звезды. Женщина у воды. Одна нога на земле, другая — в <span class="star-btn" data-tooltip="Не просто вода. Это то, что отражает небо, но не является им."><img src="star.svg" alt="★"></span> глубине. 
-                    Над головой — одна большая звезда и семь малых. Это не случайность. Это <span class="star-btn" data-tooltip="Семь — число, которое повторяется во всех культурах: семь дней, семь чакр, семь сестёр."><img src="star.svg" alt="★"></span> код, который старше нас.
-                </p>
+    <div class="book-stage">
+        <img id="bookCover" src="book.svg" alt="Книга Судеб">
+        <div class="book-3d" id="book3d">
+            <button class="book-close-btn" id="closeBook" title="Закрыть">✕</button>
+            <div class="book-inner">
+                <div class="page-slot" id="slotLeft"></div>
+                <div class="page-slot" id="slotRight"></div>
             </div>
-            <div class="article-image">
-                <img src="gif2.gif" alt="Карта Звезда">
-            </div>
-        </div>
-
-        <div class="section-divider">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-        </div>
-
-        <!-- Статья 2: ОБЩИЙ ПУЗЫРЬ (реверс) -->
-        <div class="article-bubble reverse" data-aos="fade-up" data-aos-duration="1000">
-            <div class="article-text">
-                <h2>Карты рисовали, глядя на небо</h2>
-                <p>
-                    В XV веке, когда появились первые колоды Таро, астрономия и астрология были <span class="star-btn" data-tooltip="Не суеверие, а наука о закономерностях небесных тел."><img src="star.svg" alt="★"></span> одним целым. 
-                    Художники не придумывали символы из головы. Они смотрели на созвездия и переносили их на картон.
-                </p>
-                <p>
-                    Восемь лучей на Звезде — это не просто декор. Это <span class="star-btn" data-tooltip="Восемь — бесконечность, если перевернуть. Или баланс между двумя мирами."><img src="star.svg" alt="★"></span> число, 
-                    которое встречается в орнаментах всех культур. От византийских мозаик до кельтских узлов. 
-                    <span class="star-btn" data-tooltip="Совпадение? Возможно. Но совпадения — это тоже вероятность."><img src="star.svg" alt="★"></span> Совпадение?
-                </p>
-            </div>
-            <div class="article-image">
-                <img src="gif3.gif" alt="Звёздное небо">
-            </div>
-        </div>
-
-        <div class="section-divider">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-        </div>
-
-        <!-- Статья 3: ОБЩИЙ ПУЗЫРЬ + микро-карты -->
-        <div class="article-bubble" data-aos="fade-up" data-aos-duration="1000">
-            <div class="article-text">
-                <h2>Параллели из прошлого</h2>
-                <p>
-                    Я не верю в магию. Но я верю в <span class="star-btn" data-tooltip="Не мистика, а память. То, что повторяется, оставляет след."><img src="star.svg" alt="★"></span> память. 
-                    Люди тысячи лет смотрели на одни и те же звёзды. И рисовали одни и те же символы. 
-                    Звезда, Луна, Солнце — они есть в каждой культуре, у каждого народа.
-                </p>
-                <p>
-                    В Таро Звезда стоит после Башни. После <span class="star-btn" data-tooltip="Не конец. Просто момент, когда всё рушится, чтобы освободить место."><img src="star.svg" alt="★"></span> разрушения. 
-                    Это не награда. Это <span class="star-btn" data-tooltip="Тихий вдох. Не эйфория, а облегчение."><img src="star.svg" alt="★"></span> первый вдох после бури. 
-                    И это тоже вероятность. Вероятность того, что после плохого наступает хорошее. 
-                    Не потому что магия. А потому что <span class="star-btn" data-tooltip="Всё циклично. Всё возвращается. Даже свет."><img src="star.svg" alt="★"></span> цикл.
-                </p>
-
-                <div class="micro-cards">
-                    <div class="micro-card" title="Звезда">
-                        <div class="micro-card-inner">
-                            <div class="micro-card-front"><img src="star.svg" alt="★"></div>
-                            <div class="micro-card-back"><img src="png1.jpg" alt="Карта Звезда"></div>
-                        </div>
-                    </div>
-                    <div class="micro-card" title="Луна">
-                        <div class="micro-card-inner">
-                            <div class="micro-card-front"><img src="star.svg" alt="★"></div>
-                            <div class="micro-card-back"><img src="png2.jpg" alt="Карта Луна"></div>
-                        </div>
-                    </div>
-                    <div class="micro-card" title="Солнце">
-                        <div class="micro-card-inner">
-                            <div class="micro-card-front"><img src="star.svg" alt="★"></div>
-                            <div class="micro-card-back"><img src="png3.jpg" alt="Карта Солнце"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="article-image">
-                <img src="gif4.gif" alt="Параллели">
-            </div>
-        </div>
-
-        <div class="section-divider">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-            <img src="star.svg" alt="">
-        </div>
-    </section>
-
-    <!-- ========== СЕКЦИЯ 3: ФИНАЛ ========== -->
-    <section class="final-section">
-        <h2 data-aos="fade-up" data-aos-duration="1000">Последний вопрос</h2>
-        
-        <p class="question" data-aos="fade-up" data-aos-duration="1000">
-            Ты знаешь, что среди всего этого, здесь есть только настоящая звезда?<br>
-            Введи её имя, и я покажу тебе её.
-        </p>
-
-        <div class="password-wrapper" data-aos="fade-up" data-aos-duration="1000">
-            <input type="text" class="heart-field" id="nameInput" placeholder="" aria-label="Имя звезды" autocomplete="off">
-            <div class="heart-display" id="heartDisplay"></div>
-        </div>
-
-        <div class="tarot-reveal-container" id="tarotContainer" data-aos="fade-up" data-aos-duration="1000">
-            <div class="warn-message">а-а-а! сначала угадай</div>
-            <div class="tarot-card-inner">
-                <div class="tarot-front"><img src="star.svg" alt="★"></div>
-                <div class="tarot-back">
-                    <img src="taro.png" alt="Карта Таро Звезда">
-                </div>
-            </div>
-            <div class="name-reveal">Элеонора</div>
-        </div>
-
-        <button class="inspect-btn" id="inspectBtn">Рассмотреть</button>
-    </section>
-
-    <!-- МОДАЛЬНОЕ ОКНО -->
-    <div class="modal-overlay" id="modalOverlay">
-        <div class="modal-content">
-            <button class="modal-close" id="modalClose">✕</button>
-            <div class="modal-image-wrapper" id="modalImageWrapper">
-                <img src="taro.png" alt="Карта Таро Звезда крупным планом">
+            <div class="book-toolbar">
+                <button id="prevPage" title="Назад">‹</button>
+                <span class="page-indicator" id="pageIndicator">1 / 3</span>
+                <button id="nextPage" title="Вперёд">›</button>
             </div>
         </div>
     </div>
+</main>
 
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({ once: true, offset: 100 });
+<section class="section" id="galleryView">
+    <h2>Галерея карт</h2>
+    <div class="gallery-book">
+        <div class="gallery-grid" id="galleryGrid"></div>
+    </div>
+</section>
 
-        // ==== ЗАГОЛОВОК ====
-        const heroTitle = document.getElementById('heroTitle');
-        const heroGif = document.getElementById('heroGif');
-        heroTitle.addEventListener('click', () => {
-            heroTitle.style.opacity = '';
-            heroTitle.style.transform = '';
-            heroTitle.classList.add('hidden');
-            heroGif.classList.add('visible');
-        });
+<section class="section" id="aboutView">
+    <h2>Обо мне</h2>
+    <div class="profile-wrap">
+        <div class="profile-card">
+            <div class="profile-avatar">
+                <img src="gif1.gif" alt="Ангелина"
+                    onerror="this.style.background='linear-gradient(135deg,#620f81,#43045a)';this.removeAttribute('src');">
+            </div>
+            <div class="profile-fields">
+                <div class="profile-field"><label>Имя</label><input type="text" value="Ангелина" readonly></div>
+                <div class="profile-field"><label>Возраст</label><input type="text" value="20" readonly></div>
+                <div class="profile-field"><label>Город</label><input type="text" value="Ульяновск" readonly></div>
+                <div class="profile-field"><label>Хобби</label><input type="text" value="Рисование" readonly></div>
+            </div>
+            <div class="profile-about">
+                Я делаю для вас, надеясь, что сделаю кому-то удобнее повседневные задачи.
+            </div>
+        </div>
+    </div>
+</section>
 
-        // ==== ПАДАЮЩИЕ ЗВЁЗДЫ ====
-        const fallingLayer = document.getElementById('fallingStarsLayer');
-        const MAX_STARS = 15;
-        let activeStars = 0;
+<script>
+/* ===== SVG ===== */
+(function svgCycle() {
+    const frames = document.querySelectorAll('#svgScene .frame');
+    let idx = 0;
+    setInterval(() => {
+        frames[idx].classList.remove('active');
+        idx = (idx + 1) % frames.length;
+        frames[idx].classList.add('active');
+    }, 2000);
+})();
 
-        function spawnFallingStar(x, y) {
-            if (activeStars >= MAX_STARS) return;
-            activeStars++;
+/* ===== ГЛОБАЛЬНОЕ СОСТОЯНИЕ ГАЛЕРЕИ ===== */
+/* Хранится в localStorage, чтобы карты не терялись при переходах */
+const STORAGE_KEY = 'book_of_fate_gallery_v1';
+const TOTAL_CARDS = 10;
 
-            const star = document.createElement('div');
-            star.className = 'falling-star';
-            const startX = x + (Math.random() - 0.5) * 60;
-            star.style.left = startX + 'px';
-            star.style.top = y + 'px';
-            star.innerHTML = '<img src="star.svg" alt="★">';
-            
-            const scale = 0.6 + Math.random() * 0.8;
-            star.style.transform = `scale(${scale})`;
-            
-            fallingLayer.appendChild(star);
+/* cardStates[i] = null (закрыта) | { img, meaning } (открыта) */
+let cardStates = [];
 
-            const duration = 1200 + Math.random() * 800;
-            const drift = (Math.random() - 0.5) * 150;
-            
-            const animation = star.animate([
-                { transform: `translate(0, 0) scale(${scale}) rotate(0deg)`, opacity: 1 },
-                { transform: `translate(${drift}px, 400px) scale(${scale * 0.3}) rotate(${drift * 0.5}deg)`, opacity: 0 }
-            ], {
-                duration: duration,
-                easing: 'cubic-bezier(0.4, 0, 0.8, 1)',
-                fill: 'forwards'
-            });
-
-            animation.onfinish = () => {
-                star.remove();
-                activeStars--;
-                
-                const newX = Math.random() * (window.innerWidth - 40);
-                const newY = Math.random() * (window.innerHeight - 100);
-                spawnGhostStar(newX, newY);
-            };
-        }
-
-        function spawnGhostStar(x, y) {
-            if (activeStars >= MAX_STARS) return;
-            activeStars++;
-
-            const star = document.createElement('div');
-            star.className = 'falling-star';
-            star.style.left = x + 'px';
-            star.style.top = y + 'px';
-            star.innerHTML = '<img src="star.svg" alt="★">';
-            
-            const scale = 0.4 + Math.random() * 0.5;
-            fallingLayer.appendChild(star);
-
-            star.animate([
-                { transform: `scale(0)`, opacity: 0 },
-                { transform: `scale(${scale})`, opacity: 1, offset: 0.3 },
-                { transform: `scale(${scale})`, opacity: 1, offset: 0.8 },
-                { transform: `scale(0)`, opacity: 0 }
-            ], {
-                duration: 2000,
-                easing: 'ease-out'
-            }).onfinish = () => {
-                star.remove();
-                activeStars--;
-            };
-        }
-
-        // ==== ЗВЁЗДЫ-КНОПКИ ====
-        document.querySelectorAll('.star-btn').forEach(star => {
-            const tooltipText = star.getAttribute('data-tooltip');
-            const hiddenDiv = document.createElement('span');
-            hiddenDiv.className = 'hidden-text';
-            hiddenDiv.textContent = tooltipText;
-            star.appendChild(hiddenDiv);
-
-            star.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.star-btn.active').forEach(s => {
-                    if (s !== star) s.classList.remove('active');
-                });
-                star.classList.toggle('active');
-
-                const rect = star.getBoundingClientRect();
-                const x = rect.left + rect.width / 2;
-                const y = rect.top + rect.height / 2;
-                spawnFallingStar(x, y);
-            });
-        });
-
-        document.addEventListener('click', () => {
-            document.querySelectorAll('.star-btn.active').forEach(s => s.classList.remove('active'));
-        });
-
-        // ==== МИКРО-КАРТЫ ====
-        document.querySelectorAll('.micro-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.stopPropagation();
-                card.classList.toggle('flipped');
-            });
-        });
-
-        // ==== СЕРДЕЧКИ + ПАРОЛЬ ====
-        const input = document.getElementById('nameInput');
-        const heartDisplay = document.getElementById('heartDisplay');
-        const container = document.getElementById('tarotContainer');
-        const correctName = 'элеонора';
-
-        input.addEventListener('input', (e) => {
-            const value = e.target.value;
-            heartDisplay.textContent = '♥'.repeat(value.length);
-            if (value.trim().toLowerCase() === correctName) {
-                container.classList.add('flipped');
-                container.classList.remove('warn');
-            } else {
-                container.classList.remove('flipped');
+function loadStates() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed) && parsed.length === TOTAL_CARDS) {
+                cardStates = parsed;
+                return;
             }
+        }
+    } catch (e) {}
+    cardStates = new Array(TOTAL_CARDS).fill(null);
+}
+
+function saveStates() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(cardStates)); } catch (e) {}
+}
+
+/* Открыть карту в первом свободном слоте */
+function unlockCard(img, meaning) {
+    const idx = cardStates.findIndex(s => s === null);
+    if (idx === -1) return;
+    cardStates[idx] = { img, meaning };
+    saveStates();
+}
+
+/* Проверить, открыта ли уже карта с таким изображением */
+function isCardUnlocked(img) {
+    return cardStates.some(s => s && s.img === img);
+}
+
+/* ===== НАВИГАЦИЯ ===== */
+const mainView = document.getElementById('mainView');
+const galleryView = document.getElementById('galleryView');
+const aboutView = document.getElementById('aboutView');
+const allSections = document.querySelectorAll('.section');
+
+function showSection(name) {
+    mainView.style.display = name === 'main' ? 'flex' : 'none';
+    allSections.forEach(s => s.classList.remove('active'));
+    if (name === 'gallery') { galleryView.classList.add('active'); buildGallery(); }
+    else if (name === 'about') aboutView.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.querySelectorAll('header nav a').forEach(a => {
+    a.addEventListener('click', () => showSection(a.dataset.section));
+});
+
+/* ===== СТРАНИЦЫ ===== */
+const pagesData = [
+    {
+        left: `В давние времена, когда мир был ещё молод, древние силы сплели нити судьбы в единое полотно. Это полотно хранит тайны каждого живого существа. <span class="owl-word" data-card="owl" data-img="taro sova.png" data-meaning="Твоя семья завтра сдохнет от бомбардировки">Сова</span> — хранительница этих тайн, она видит то, что скрыто от глаз смертных.`,
+        right: `Легенды гласят, что тот, кто осмелится заглянуть в глубины этой книги, увидит свою судьбу. Но будь осторожен — не всё, что ты увидишь, тебе понравится.`
+    },
+    {
+        left: `Вторая страница открывает перед тобой карту. Карта — это не просто бумага, это отражение твоего будущего. Каждая карта уникальна, как уникален путь каждого человека.`,
+        right: `Некоторые карты предвещают радость и успех, другие — испытания и потери. Но все они говорят правду, какой бы горькой она ни была.`
+    },
+    {
+        left: `Третья страница — последняя. Здесь заканчивается путь обычного читателя и начинается путь избранного. Ты дошёл до конца книги, но это только начало твоего пути.`,
+        right: `Помни: судьба не предопределена. Каждый выбор, каждое действие меняет узор на полотне. Используй знания мудро. И запомни: <span class="croc-word" data-card="croc" data-img="grimm.png" data-meaning="Крокодил предрекает перемены, которых ты так боялся">Крокодил</span> — не всегда враг.`
+    }
+];
+
+const bookCover = document.getElementById('bookCover');
+const book3d = document.getElementById('book3d');
+const slotLeft = document.getElementById('slotLeft');
+const slotRight = document.getElementById('slotRight');
+const pageIndicator = document.getElementById('pageIndicator');
+const prevBtn = document.getElementById('prevPage');
+const nextBtn = document.getElementById('nextPage');
+const closeBookBtn = document.getElementById('closeBook');
+
+let currentSpread = 0;
+let isAnimating = false;
+let bookOpened = false;
+
+function renderPage(container, html, side) {
+    container.innerHTML = '';
+    const page = document.createElement('div');
+    page.className = `book-page ${side}-page`;
+    page.innerHTML = html;
+    container.appendChild(page);
+    return page;
+}
+
+function renderSpread(idx) {
+    renderPage(slotLeft, pagesData[idx].left, 'left');
+    renderPage(slotRight, pagesData[idx].right, 'right');
+    bindClickWords();
+    pageIndicator.textContent = `${idx + 1} / ${pagesData.length}`;
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === pagesData.length - 1;
+}
+
+function bindClickWords() {
+    document.querySelectorAll('.owl-word, .croc-word').forEach(word => {
+        if (word.dataset.bound) return;
+        word.dataset.bound = '1';
+        word.addEventListener('click', triggerWord);
+    });
+}
+
+function openBook() {
+    if (bookOpened) return;
+    bookOpened = true;
+    bookCover.classList.add('shake');
+    setTimeout(() => bookCover.classList.add('opening'), 700);
+    setTimeout(() => {
+        bookCover.style.display = 'none';
+        book3d.classList.add('visible');
+        renderSpread(0);
+    }, 1600);
+}
+function closeBook() {
+    book3d.classList.remove('visible');
+    bookCover.style.display = '';
+    bookCover.classList.remove('opening');
+    bookOpened = false;
+    currentSpread = 0;
+}
+bookCover.addEventListener('click', openBook);
+closeBookBtn.addEventListener('click', closeBook);
+
+/* ===== ФИЗИЧНОЕ ПЕРЕЛИСТЫВАНИЕ ===== */
+let dragState = null;
+
+function onDragStart(e) {
+    if (isAnimating) return;
+    if (e.target.closest('button')) return;
+    if (e.target.closest('.owl-word, .croc-word')) return;
+    if (!book3d.classList.contains('visible')) return;
+
+    const rect = book3d.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const half = rect.width / 2;
+    const side = x > half ? 'right' : 'left';
+
+    if (side === 'right' && currentSpread >= pagesData.length - 1) return;
+    if (side === 'left' && currentSpread <= 0) return;
+
+    dragState = { startX: e.clientX, startY: e.clientY, side, dragging: false, flipEl: null, lastAngle: 0 };
+    book3d.setPointerCapture(e.pointerId);
+}
+
+function onDragMove(e) {
+    if (!dragState) return;
+    const dx = e.clientX - dragState.startX;
+    const dy = e.clientY - dragState.startY;
+
+    if (!dragState.dragging) {
+        if (Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+            dragState.dragging = true;
+            const source = dragState.side === 'right' ? slotRight : slotLeft;
+            const flip = document.createElement('div');
+            flip.className = `flip-page flip-${dragState.side}`;
+            flip.innerHTML = source.innerHTML;
+            book3d.appendChild(flip);
+            dragState.flipEl = flip;
+        }
+    }
+    if (!dragState.dragging) return;
+
+    const W = book3d.getBoundingClientRect().width / 2;
+    let angle;
+    if (dragState.side === 'right') angle = Math.max(-180, Math.min(0, (dx / W) * 180));
+    else angle = Math.max(0, Math.min(180, (dx / W) * 180));
+    dragState.lastAngle = angle;
+    dragState.flipEl.style.transform = `rotateY(${angle}deg)`;
+}
+
+function onDragEnd() {
+    if (!dragState) return;
+    const state = dragState;
+    dragState = null;
+    if (!state.dragging || !state.flipEl) return;
+
+    const flip = state.flipEl;
+    const angle = state.lastAngle;
+    const threshold = 50;
+    const complete = state.side === 'right' ? angle < -threshold : angle > threshold;
+
+    if (complete) {
+        const target = state.side === 'right' ? -180 : 180;
+        flip.style.transition = 'transform 0.4s ease-in, opacity 0.4s ease-in';
+        requestAnimationFrame(() => {
+            flip.style.transform = `rotateY(${target}deg)`;
+            flip.style.opacity = '0';
         });
+        setTimeout(() => {
+            flip.remove();
+            if (state.side === 'right') { currentSpread++; renderSpread(currentSpread); }
+            else { currentSpread--; renderSpread(currentSpread); }
+        }, 400);
+    } else {
+        flip.style.transition = 'transform 0.35s ease-out';
+        requestAnimationFrame(() => { flip.style.transform = 'rotateY(0deg)'; });
+        setTimeout(() => flip.remove(), 350);
+    }
+}
 
-        container.addEventListener('click', () => {
-            if (container.classList.contains('flipped')) return;
-            container.classList.add('warn');
-            if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-            setTimeout(() => container.classList.remove('warn'), 1500);
-        });
+book3d.addEventListener('pointerdown', onDragStart);
+book3d.addEventListener('pointermove', onDragMove);
+book3d.addEventListener('pointerup', onDragEnd);
+book3d.addEventListener('pointercancel', onDragEnd);
 
-        // ==== МОДАЛЬНОЕ ОКНО ====
-        const inspectBtn = document.getElementById('inspectBtn');
-        const modalOverlay = document.getElementById('modalOverlay');
-        const modalClose = document.getElementById('modalClose');
-        const modalImageWrapper = document.getElementById('modalImageWrapper');
+function goNext() {
+    if (isAnimating || currentSpread >= pagesData.length - 1) return;
+    isAnimating = true;
+    const flip = document.createElement('div');
+    flip.className = 'flip-page flip-right';
+    flip.innerHTML = slotRight.innerHTML;
+    book3d.appendChild(flip);
+    requestAnimationFrame(() => {
+        flip.style.transition = 'transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.7s';
+        flip.style.transform = 'rotateY(-180deg)';
+        flip.style.opacity = '0';
+    });
+    setTimeout(() => {
+        flip.remove();
+        currentSpread++;
+        renderSpread(currentSpread);
+        isAnimating = false;
+    }, 700);
+}
+function goPrev() {
+    if (isAnimating || currentSpread <= 0) return;
+    isAnimating = true;
+    const flip = document.createElement('div');
+    flip.className = 'flip-page flip-left';
+    flip.innerHTML = slotLeft.innerHTML;
+    book3d.appendChild(flip);
+    requestAnimationFrame(() => {
+        flip.style.transition = 'transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.7s';
+        flip.style.transform = 'rotateY(180deg)';
+        flip.style.opacity = '0';
+    });
+    setTimeout(() => {
+        flip.remove();
+        currentSpread--;
+        renderSpread(currentSpread);
+        isAnimating = false;
+    }, 700);
+}
+nextBtn.addEventListener('click', goNext);
+prevBtn.addEventListener('click', goPrev);
 
-        inspectBtn.addEventListener('click', () => modalOverlay.classList.add('active'));
-        modalClose.addEventListener('click', () => {
-            modalOverlay.classList.remove('active');
-            modalImageWrapper.style.transform = 'rotateX(0) rotateY(0)';
-        });
+/* ===== КЛИК ПО СЛОВУ → ЗВЁЗДЫ + КАРТА ===== */
+function triggerWord(e) {
+    e.stopPropagation();
+    const word = e.currentTarget;
+    const img = word.dataset.img;
+    const meaning = word.dataset.meaning;
+    const color = word.classList.contains('croc-word') ? '#7ed957' : '#ffd84d';
 
-        modalOverlay.addEventListener('click', (e) => {
-            if (e.target === modalOverlay) {
-                modalOverlay.classList.remove('active');
-                modalImageWrapper.style.transform = 'rotateX(0) rotateY(0)';
-            }
-        });
+    // если карта уже открыта — не даём открыть повторно
+    if (isCardUnlocked(img)) return;
 
-        modalOverlay.addEventListener('mousemove', (e) => {
-            if (!modalOverlay.classList.contains('active')) return;
-            const rect = modalOverlay.getBoundingClientRect();
-            const x = (e.clientX - rect.left) / rect.width - 0.5;
-            const y = (e.clientY - rect.top) / rect.height - 0.5;
-            modalImageWrapper.style.transform = `rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translate(${x * 15}px, ${y * 15}px)`;
-        });
+    // звёзды
+    const rect = word.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    for (let i = 0; i < 20; i++) {
+        const star = document.createElement('div');
+        star.className = 'star-particle';
+        star.textContent = Math.random() > 0.5 ? '★' : '✦';
+        star.style.color = color;
+        star.style.fontSize = (10 + Math.random() * 14) + 'px';
+        star.style.left = cx + 'px';
+        star.style.top = cy + 'px';
+        const angle = (Math.PI * 2 * i) / 20 + (Math.random() - 0.5) * 0.6;
+        const dist = 100 + Math.random() * 220;
+        const tx = Math.cos(angle) * dist;
+        const ty = Math.sin(angle) * dist - 40;
+        const rot = (Math.random() - 0.5) * 720;
+        document.body.appendChild(star);
+        star.animate([
+            { transform: 'translate(0,0) scale(1) rotate(0)', opacity: 1 },
+            { transform: `translate(${tx}px, ${ty}px) scale(0.3) rotate(${rot}deg)`, opacity: 0 }
+        ], { duration: 900 + Math.random() * 600, easing: 'cubic-bezier(0.15, 0.6, 0.4, 1)', fill: 'forwards' });
+        setTimeout(() => star.remove(), 1700);
+    }
 
-        modalOverlay.addEventListener('mouseleave', () => {
-            modalImageWrapper.style.transform = 'rotateX(0) rotateY(0) translate(0, 0)';
-        });
+    setTimeout(() => spawnFlyingCard(img, meaning), 300);
+}
 
-        modalOverlay.addEventListener('touchmove', (e) => {
-            if (!modalOverlay.classList.contains('active')) return;
-            const touch = e.touches[0];
-            const rect = modalOverlay.getBoundingClientRect();
-            const x = (touch.clientX - rect.left) / rect.width - 0.5;
-            const y = (touch.clientY - rect.top) / rect.height - 0.5;
-            modalImageWrapper.style.transform = `rotateX(${-y * 10}deg) rotateY(${x * 10}deg) translate(${x * 15}px, ${y * 15}px)`;
-        }, { passive: true });
-    </script>
+/* ===== ВЫЛЕТ КАРТЫ ===== */
+function spawnFlyingCard(img, meaning) {
+    const overlay = document.createElement('div');
+    overlay.className = 'card-flight-overlay';
+
+    const card = document.createElement('div');
+    card.className = 'flight-card';
+    card.innerHTML = `<img src="${img}" alt="Карта"
+        onerror="this.style.minHeight='380px';this.style.background='linear-gradient(135deg,#d0a043,#633207)';this.removeAttribute('src');">`;
+
+    const actions = document.createElement('div');
+    actions.className = 'card-actions';
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Закрыть';
+    const catalogBtn = document.createElement('button');
+    catalogBtn.textContent = 'В галерею';
+    actions.appendChild(closeBtn);
+    actions.appendChild(catalogBtn);
+
+    overlay.appendChild(card);
+    overlay.appendChild(actions);
+    document.body.appendChild(overlay);
+
+    setTimeout(() => {
+        overlay.classList.add('reveal');
+        card.classList.add('settled');
+    }, 2600);
+
+    overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) removeOverlay();
+    });
+
+    card.addEventListener('pointermove', (ev) => {
+        const r = card.getBoundingClientRect();
+        const mx = (ev.clientX - r.left) / r.width - 0.5;
+        const my = (ev.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(800px) scale(1) rotate(1080deg) rotateX(${-my * 18}deg) rotateY(${mx * 18}deg)`;
+    });
+    card.addEventListener('pointerleave', () => {
+        card.style.transform = `perspective(800px) scale(1) rotate(1080deg)`;
+    });
+
+    function removeOverlay() {
+        overlay.style.transition = 'opacity 0.4s';
+        overlay.style.opacity = '0';
+        setTimeout(() => overlay.remove(), 400);
+    }
+
+    /* ВАЖНО: и по «Закрыть», и по «В галерею», и по клику вне —
+       карта ДОБАВЛЯЕТСЯ в галерею */
+    function unlockAndClose(goToGallery) {
+        unlockCard(img, meaning);
+        removeOverlay();
+        if (goToGallery) {
+            showSection('gallery');
+        }
+    }
+
+    closeBtn.addEventListener('click', () => unlockAndClose(false));
+    catalogBtn.addEventListener('click', () => unlockAndClose(true));
+
+    // клик вне карты — тоже разблокирует и добавляет в галерею
+    overlay.addEventListener('click', (ev) => {
+        if (ev.target === overlay) unlockAndClose(false);
+    });
+}
+
+/* ===== ГАЛЕРЕЯ ===== */
+const galleryGrid = document.getElementById('galleryGrid');
+
+function buildGallery() {
+    galleryGrid.innerHTML = '';
+    for (let i = 0; i < TOTAL_CARDS; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'gallery-cell';
+
+        const state = cardStates[i];
+        if (state) {
+            const card = document.createElement('div');
+            card.className = 'gallery-card opened';
+            card.innerHTML = `<img src="${state.img}" alt="Карта"
+                onerror="this.style.minHeight='200px';this.style.background='linear-gradient(135deg,#d0a043,#633207)';this.removeAttribute('src');">`;
+            const meaning = document.createElement('div');
+            meaning.className = 'gallery-meaning';
+            meaning.textContent = state.meaning;
+            cell.appendChild(card);
+            cell.appendChild(meaning);
+        } else {
+            const card = document.createElement('div');
+            card.className = 'gallery-card dark';
+            const sticker = document.createElement('div');
+            sticker.className = 'sticker';
+            sticker.textContent = 'позже';
+            card.appendChild(sticker);
+            cell.appendChild(card);
+        }
+        galleryGrid.appendChild(cell);
+    }
+}
+
+/* ===== СТАРТ ===== */
+loadStates();
+showSection('main');
+</script>
 </body>
 </html>
