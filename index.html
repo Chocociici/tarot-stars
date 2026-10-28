@@ -61,10 +61,10 @@ main {
     max-width: 1000px; margin: 0 auto;
     padding: 10px 20px 50px;
     display: flex; flex-direction: column;
-    align-items: center; gap: 10px;
+    align-items: center; gap: 0;
 }
 
-/* ===== SVG-ТЫКВА (кликабельная, squash) ===== */
+/* ===== SVG-ТЫКВА (кликабельная, squash, спам) ===== */
 .svg-scene {
     width: 100%; max-width: 380px;
     aspect-ratio: 1/1; position: relative;
@@ -73,13 +73,12 @@ main {
     transform-origin: center bottom;
     transition: filter 0.3s ease;
     margin-top: 10px;
-    margin-bottom: 0;          /* было 20px — убрал */
+    margin-bottom: 0;
     user-select: none;
 }
 .svg-scene:hover {
     filter: drop-shadow(0 14px 36px rgba(99,50,7,0.5));
 }
-/* Squash-анимация: расширяется по X, сжимается по Y — как мячик */
 @keyframes pumpkinSquash {
     0%   { transform: scaleX(1)    scaleY(1);    }
     15%  { transform: scaleX(1.18) scaleY(0.82); }
@@ -101,7 +100,7 @@ main {
 }
 .svg-scene .frame.active { display: block; }
 
-/* ===== ОБЛОЖКА ===== */
+/* ===== ОБЛОЖКА (сближена с тыквой) ===== */
 .book-stage {
     width: 100%;
     display: flex; justify-content: center;
@@ -109,7 +108,7 @@ main {
     perspective: 2600px;
     min-height: 460px;
     position: relative;
-    margin-top: -90px;         /* было -30px — сблизил с тыквой */
+    margin-top: -90px;
 }
 #bookCover {
     width: 280px; max-width: 80vw;
@@ -117,7 +116,7 @@ main {
     filter: drop-shadow(0 14px 30px rgba(0,0,0,0.45));
     transition: transform 0.4s ease, filter 0.4s ease, opacity 0.6s;
     transform-style: preserve-3d;
-    margin-top: 0;             /* было -10px — убрал */
+    margin-top: 0;
 }
 #bookCover:hover { transform: translateY(-6px) rotateY(-6deg) scale(1.02); filter: drop-shadow(0 20px 40px rgba(0,0,0,0.55)); }
 #bookCover.shake { animation: bookShake 0.7s cubic-bezier(.36,.07,.19,.97); }
@@ -453,7 +452,7 @@ main {
     pointer-events: none;
 }
 .gallery-card.dark::after {
-    content: '';
+    content: '???';
     position: absolute;
     font-family: 'Marck Script', cursive;
     font-size: 34px;
@@ -538,12 +537,10 @@ main {
 
 /* ===== АДАПТИВ ===== */
 @media (max-width: 768px) {
-    .svg-scene { margin-top: 4px; margin-bottom: 0; }
-    .book-stage { margin-top: -50px; }   /* было -10px */
     header { gap: 22px; padding: 12px 16px; }
     header nav a { font-size: 20px; }
 
-    .svg-scene { margin-top: 10px; margin-bottom: 10px; }
+    .svg-scene { margin-top: 4px; margin-bottom: 0; }
 
     .book-3d { height: auto; aspect-ratio: 3 / 4; max-width: 420px; max-height: 520px; }
     .book-inner { flex-direction: row; }
@@ -574,15 +571,13 @@ main {
     .gallery-card.dark::before { width: 22px; height: 22px; top: -12px; }
     .section h2 { font-size: 32px; }
     .profile-card { padding: 28px 24px; }
-    .book-stage { margin-top: -10px; }
+    .book-stage { margin-top: -50px; }
 }
 
 @media (max-width: 480px) {
-.svg-scene { max-width: 280px; margin-top: 2px; }
-    .book-stage { margin-top: -40px; }
     header { gap: 14px; }
     header nav a { font-size: 17px; }
-    .svg-scene { max-width: 280px; margin-top: 6px; }
+    .svg-scene { max-width: 280px; margin-top: 2px; }
     #bookCover { width: 200px; }
     .book-3d { aspect-ratio: 3 / 4.1; max-width: 360px; max-height: 480px; }
     .book-page { padding: 28px 14px 58px; font-size: 14px; line-height: 1.4; }
@@ -599,6 +594,7 @@ main {
     .gallery-meaning { font-size: 13px; max-width: 110px; }
     .profile-avatar { width: 110px; height: 110px; }
     .profile-field input { font-size: 19px; }
+    .book-stage { margin-top: -40px; }
 }
 </style>
 </head>
@@ -617,7 +613,7 @@ main {
 </header>
 
 <main id="mainView">
-    <!-- Тыква: кликабельная, squash-анимация -->
+    <!-- Тыква: кликабельная, squash-анимация, можно спамить -->
     <div class="svg-scene" id="svgScene" title="Нажми на меня">
         <img class="frame active" src="ikon1.svg" alt="Кадр 1">
         <img class="frame" src="ikon2.svg" alt="Кадр 2">
@@ -670,7 +666,7 @@ main {
 </section>
 
 <script>
-/* ===== SVG (плюс клик по тыкве) ===== */
+/* ===== SVG ===== */
 const svgScene = document.getElementById('svgScene');
 (function svgCycle() {
     const frames = document.querySelectorAll('#svgScene .frame');
@@ -682,16 +678,14 @@ const svgScene = document.getElementById('svgScene');
     }, 2000);
 })();
 
-/* Клик по тыкве — squash-анимация «как мячик» */
-let squashCooldown = false;
+/* Клик по тыкве — squash-анимация, можно спамить (каждый клик перезапускает) */
 svgScene.addEventListener('click', () => {
-    if (squashCooldown) return;
-    squashCooldown = true;
+    svgScene.classList.remove('squash');
+    void svgScene.offsetWidth; /* reflow — сброс анимации */
     svgScene.classList.add('squash');
-    setTimeout(() => {
-        svgScene.classList.remove('squash');
-        squashCooldown = false;
-    }, 850);
+});
+svgScene.addEventListener('animationend', () => {
+    svgScene.classList.remove('squash');
 });
 
 /* ===== ГАЛЕРЕЯ: localStorage ===== */
