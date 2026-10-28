@@ -64,7 +64,7 @@ main {
     align-items: center; gap: 0;
 }
 
-/* ===== SVG-ТЫКВА (кликабельная, squash, спам) ===== */
+/* ===== SVG-ТЫКВА (кликабельная, squash, happy) ===== */
 .svg-scene {
     width: 100%; max-width: 380px;
     aspect-ratio: 1/1; position: relative;
@@ -100,7 +100,19 @@ main {
 }
 .svg-scene .frame.active { display: block; }
 
-/* ===== ОБЛОЖКА (сближена с тыквой) ===== */
+/* Happy-картинка поверх тыквы на время клика */
+.svg-scene .happy-img {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    display: none;
+    z-index: 5;
+}
+.svg-scene.happy .frame { display: none !important; }
+.svg-scene.happy .happy-img { display: block; }
+
+/* ===== ОБЛОЖКА ===== */
 .book-stage {
     width: 100%;
     display: flex; justify-content: center;
@@ -212,7 +224,7 @@ main {
 .flip-page.flip-left { left: 0; transform-origin: right center; }
 
 /* кликабельные слова */
-.owl-word, .croc-word, .tiger-word, .sheep-word {
+.owl-word, .croc-word, .tiger-word, .sheep-word, .kang-word {
     font-weight: 700; cursor: pointer;
     display: inline-block; position: relative;
     font-family: 'Marck Script', cursive;
@@ -226,6 +238,8 @@ main {
 .tiger-word:hover { text-shadow: 0 0 22px rgba(255,154,60,1), 0 0 40px rgba(255,154,60,0.8); transform: scale(1.08); }
 .sheep-word { color: #a8c8e8; text-shadow: 0 0 10px rgba(168,200,232,0.7); }
 .sheep-word:hover { text-shadow: 0 0 22px rgba(168,200,232,1), 0 0 40px rgba(168,200,232,0.8); transform: scale(1.08); }
+.kang-word { color: #d59a6b; text-shadow: 0 0 10px rgba(213,154,107,0.7); }
+.kang-word:hover { text-shadow: 0 0 22px rgba(213,154,107,1), 0 0 40px rgba(213,154,107,0.8); transform: scale(1.08); }
 
 .book-toolbar {
     position: absolute; bottom: 12px; left: 0; right: 0;
@@ -452,7 +466,7 @@ main {
     pointer-events: none;
 }
 .gallery-card.dark::after {
-    content: '???';
+    
     position: absolute;
     font-family: 'Marck Script', cursive;
     font-size: 34px;
@@ -613,11 +627,12 @@ main {
 </header>
 
 <main id="mainView">
-    <!-- Тыква: кликабельная, squash-анимация, можно спамить -->
+    <!-- Тыква: кликабельная, squash + happy + звук -->
     <div class="svg-scene" id="svgScene" title="Нажми на меня">
         <img class="frame active" src="ikon1.svg" alt="Кадр 1">
         <img class="frame" src="ikon2.svg" alt="Кадр 2">
         <img class="frame" src="ikon3.svg" alt="Кадр 3">
+        <img class="happy-img" src="happy.svg" alt="Счастье">
     </div>
 
     <div class="book-stage">
@@ -668,28 +683,50 @@ main {
 <script>
 /* ===== SVG ===== */
 const svgScene = document.getElementById('svgScene');
-(function svgCycle() {
-    const frames = document.querySelectorAll('#svgScene .frame');
-    let idx = 0;
-    setInterval(() => {
-        frames[idx].classList.remove('active');
-        idx = (idx + 1) % frames.length;
-        frames[idx].classList.add('active');
-    }, 2000);
-})();
+const svgFrames = document.querySelectorAll('#svgScene .frame');
+let svgIdx = 0;
+let svgTimer = setInterval(cycleSvgFrame, 2000);
 
-/* Клик по тыкве — squash-анимация, можно спамить (каждый клик перезапускает) */
+function cycleSvgFrame() {
+    svgFrames[svgIdx].classList.remove('active');
+    svgIdx = (svgIdx + 1) % svgFrames.length;
+    svgFrames[svgIdx].classList.add('active');
+}
+
+/* ===== ЗВУК ===== */
+const miauAudio = new Audio('miau.mp3');
+miauAudio.preload = 'auto';
+
+/* Клик по тыкве — squash + happy + звук (можно спамить) */
 svgScene.addEventListener('click', () => {
+    /* перезапуск squash-анимации */
     svgScene.classList.remove('squash');
-    void svgScene.offsetWidth; /* reflow — сброс анимации */
+    void svgScene.offsetWidth;
     svgScene.classList.add('squash');
+
+    /* смена картинки на happy.svg, но squash-анимация продолжает играть */
+    svgScene.classList.add('happy');
+
+    /* звук — перезапускаем с начала, чтобы можно было спамить */
+    try {
+        miauAudio.currentTime = 0;
+        const playPromise = miauAudio.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+            playPromise.catch(() => { /* браузер может блокировать до первого взаимодействия */ });
+        }
+    } catch (e) {}
 });
-svgScene.addEventListener('animationend', () => {
-    svgScene.classList.remove('squash');
+
+/* когда squash-анимация закончилась — убираем happy */
+svgScene.addEventListener('animationend', (e) => {
+    if (e.animationName === 'pumpkinSquash') {
+        svgScene.classList.remove('squash');
+        svgScene.classList.remove('happy');
+    }
 });
 
 /* ===== ГАЛЕРЕЯ: localStorage ===== */
-const STORAGE_KEY = 'book_of_fate_gallery_v5';
+const STORAGE_KEY = 'book_of_fate_gallery_v6';
 const TOTAL_CARDS = 10;
 let cardStates = [];
 
@@ -741,7 +778,7 @@ document.querySelectorAll('header nav a').forEach(a => {
 const MOBILE_BREAKPOINT = 768;
 function isMobile() { return window.innerWidth <= MOBILE_BREAKPOINT; }
 
-/* ===== СТРАНИЦЫ ===== */
+/* ===== СТРАНИЦЫ (Сова, Крокодил, Тигр, Овечка, Кенгуру) ===== */
 const pagesData = [
     {
         left: `В давние времена, когда мир был ещё молод, древние силы сплели нити судьбы в единое полотно. Это полотно хранит тайны каждого живого существа. <span class="owl-word" data-img="taro sova.png" data-meaning="Твоя семья завтра сдохнет от бомбардировки">Сова</span> — хранительница этих тайн, она видит то, что скрыто от глаз смертных.`,
@@ -753,7 +790,7 @@ const pagesData = [
     },
     {
         left: `Третья страница — последняя. Здесь заканчивается путь обычного читателя и начинается путь избранного. Ты дошёл до конца книги, но это только начало твоего пути.`,
-        right: `Помни: судьба не предопределена. Каждый выбор, каждое действие меняет узор на полотне. Используй знания мудро. И запомни: <span class="croc-word" data-img="grimm.png" data-meaning="Крокодил предрекает перемены, которых ты так боялся">Крокодил</span> — не всегда враг. А <span class="tiger-word" data-img="tigr.png" data-meaning="Тигр говорит: полосат, да не кот — иди вперёд, не оглядывайся">Тигр</span> — не всегда кот.`
+        right: `Помни: судьба не предопределена. Каждый выбор, каждое действие меняет узор на полотне. Используй знания мудро. И запомни: <span class="croc-word" data-img="grimm.png" data-meaning="Крокодил предрекает перемены, которых ты так боялся">Крокодил</span> — не всегда враг. А <span class="tiger-word" data-img="tigr.png" data-meaning="Тигр говорит: полосат, да не кот — иди вперёд, не оглядывайся">Тигр</span> — не всегда кот. А уж <span class="kang-word" data-img="kenguru.png" data-meaning="Кенгуру напоминает: прыгай выше — и сумка всегда с собой">кенгуру</span> и подавно не сумка.`
     }
 ];
 
@@ -795,7 +832,7 @@ function renderSpread(idx) {
 }
 
 function bindClickWords() {
-    document.querySelectorAll('.owl-word, .croc-word, .tiger-word, .sheep-word').forEach(word => {
+    document.querySelectorAll('.owl-word, .croc-word, .tiger-word, .sheep-word, .kang-word').forEach(word => {
         if (word.dataset.bound) return;
         word.dataset.bound = '1';
         word.addEventListener('click', triggerWord);
@@ -833,7 +870,7 @@ let dragState = null;
 function onDragStart(e) {
     if (isAnimating) return;
     if (e.target.closest('button')) return;
-    if (e.target.closest('.owl-word, .croc-word, .tiger-word, .sheep-word')) return;
+    if (e.target.closest('.owl-word, .croc-word, .tiger-word, .sheep-word, .kang-word')) return;
     if (!book3d.classList.contains('visible')) return;
 
     const rect = book3d.getBoundingClientRect();
@@ -960,6 +997,7 @@ function triggerWord(e) {
     if (word.classList.contains('croc-word')) color = '#7ed957';
     else if (word.classList.contains('tiger-word')) color = '#ff9a3c';
     else if (word.classList.contains('sheep-word')) color = '#a8c8e8';
+    else if (word.classList.contains('kang-word')) color = '#d59a6b';
 
     if (isCardUnlocked(img)) return;
 
