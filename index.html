@@ -59,21 +59,45 @@ header nav a:hover::after { transform: scaleX(1); }
 main {
     position: relative; z-index: 2;
     max-width: 1000px; margin: 0 auto;
-    padding: 30px 20px 50px;
+    padding: 10px 20px 50px;
     display: flex; flex-direction: column;
     align-items: center; gap: 10px;
 }
 
-/* ===== SVG ===== */
+/* ===== SVG-ТЫКВА (кликабельная, squash) ===== */
 .svg-scene {
     width: 100%; max-width: 380px;
     aspect-ratio: 1/1; position: relative;
     filter: drop-shadow(0 10px 30px rgba(99,50,7,0.35));
+    cursor: pointer;
+    transform-origin: center bottom;
+    transition: filter 0.3s ease;
+    margin-top: 10px;
+    margin-bottom: 0;          /* было 20px — убрал */
+    user-select: none;
+}
+.svg-scene:hover {
+    filter: drop-shadow(0 14px 36px rgba(99,50,7,0.5));
+}
+/* Squash-анимация: расширяется по X, сжимается по Y — как мячик */
+@keyframes pumpkinSquash {
+    0%   { transform: scaleX(1)    scaleY(1);    }
+    15%  { transform: scaleX(1.18) scaleY(0.82); }
+    30%  { transform: scaleX(0.92) scaleY(1.08); }
+    45%  { transform: scaleX(1.08) scaleY(0.94); }
+    60%  { transform: scaleX(0.97) scaleY(1.03); }
+    75%  { transform: scaleX(1.02) scaleY(0.98); }
+    90%  { transform: scaleX(1.005) scaleY(0.995); }
+    100% { transform: scaleX(1)    scaleY(1);    }
+}
+.svg-scene.squash {
+    animation: pumpkinSquash 0.85s cubic-bezier(0.36, 0.07, 0.19, 0.97) forwards;
 }
 .svg-scene .frame {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: contain; display: none;
+    pointer-events: none;
 }
 .svg-scene .frame.active { display: block; }
 
@@ -85,7 +109,7 @@ main {
     perspective: 2600px;
     min-height: 460px;
     position: relative;
-    margin-top: -50px;
+    margin-top: -90px;         /* было -30px — сблизил с тыквой */
 }
 #bookCover {
     width: 280px; max-width: 80vw;
@@ -93,6 +117,7 @@ main {
     filter: drop-shadow(0 14px 30px rgba(0,0,0,0.45));
     transition: transform 0.4s ease, filter 0.4s ease, opacity 0.6s;
     transform-style: preserve-3d;
+    margin-top: 0;             /* было -10px — убрал */
 }
 #bookCover:hover { transform: translateY(-6px) rotateY(-6deg) scale(1.02); filter: drop-shadow(0 20px 40px rgba(0,0,0,0.55)); }
 #bookCover.shake { animation: bookShake 0.7s cubic-bezier(.36,.07,.19,.97); }
@@ -321,34 +346,18 @@ main {
     text-shadow: 0 2px 8px rgba(255,255,255,0.6);
 }
 
-/* ===== ГАЛЕРЕЯ — ВЫСТАВОЧНАЯ ДОСКА ===== */
+/* ===== ГАЛЕРЕЯ — ДОСКА ===== */
 .gallery-board {
     position: relative;
     padding: 50px 40px;
     border-radius: 16px;
     background:
-        /* волокна пробки */
-        repeating-linear-gradient(
-            45deg,
-            rgba(0,0,0,0.02) 0px,
-            rgba(0,0,0,0.02) 2px,
-            transparent 2px,
-            transparent 6px
-        ),
-        repeating-linear-gradient(
-            -45deg,
-            rgba(255,255,255,0.03) 0px,
-            rgba(255,255,255,0.03) 1px,
-            transparent 1px,
-            transparent 5px
-        ),
+        repeating-linear-gradient(45deg, rgba(0,0,0,0.02) 0px, rgba(0,0,0,0.02) 2px, transparent 2px, transparent 6px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 5px),
         radial-gradient(circle at 30% 20%, #c9a66b 0%, #b08b52 60%, #96713e 100%);
-    box-shadow:
-        inset 0 0 60px rgba(60,30,5,0.45),
-        0 20px 60px rgba(0,0,0,0.45);
+    box-shadow: inset 0 0 60px rgba(60,30,5,0.45), 0 20px 60px rgba(0,0,0,0.45);
     border: 10px solid #6b4a24;
     border-radius: 18px;
-    /* рамка из тёмного дерева */
     outline: 2px solid #4a3015;
 }
 .gallery-board::before {
@@ -358,7 +367,6 @@ main {
     pointer-events: none;
     box-shadow: inset 0 0 0 2px rgba(255,220,150,0.15);
 }
-
 .gallery-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -366,16 +374,12 @@ main {
     position: relative; z-index: 1;
 }
 .gallery-cell { position: relative; display: flex; flex-direction: column; align-items: center; }
-
-/* Открытая карточка — прикреплена булавкой */
 .gallery-card {
     position: relative;
     background: #fffdf6;
     border-radius: 4px;
-    padding: 10px 10px 34px; /* снизу место под подпись */
-    box-shadow:
-        0 6px 14px rgba(0,0,0,0.35),
-        0 2px 3px rgba(0,0,0,0.2);
+    padding: 10px 10px 34px;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.35), 0 2px 3px rgba(0,0,0,0.2);
     aspect-ratio: 2/3;
     display: flex; align-items: center; justify-content: center;
     overflow: visible;
@@ -384,9 +388,7 @@ main {
 }
 .gallery-card.opened:hover {
     transform: rotate(0deg) scale(1.04);
-    box-shadow:
-        0 14px 30px rgba(0,0,0,0.45),
-        0 4px 8px rgba(0,0,0,0.25);
+    box-shadow: 0 14px 30px rgba(0,0,0,0.45), 0 4px 8px rgba(0,0,0,0.25);
     z-index: 5;
 }
 .gallery-card img {
@@ -394,8 +396,6 @@ main {
     border-radius: 2px; display: block;
     box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08);
 }
-
-/* БУЛАВКА */
 .gallery-card::before {
     content: '';
     position: absolute;
@@ -404,14 +404,10 @@ main {
     width: 26px; height: 26px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #ff6b6b 0%, #d92b2b 45%, #8a0f0f 100%);
-    box-shadow:
-        0 3px 6px rgba(0,0,0,0.5),
-        inset -2px -2px 4px rgba(0,0,0,0.3),
-        inset 2px 2px 3px rgba(255,255,255,0.5);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.5), inset -2px -2px 4px rgba(0,0,0,0.3), inset 2px 2px 3px rgba(255,255,255,0.5);
     z-index: 10;
     pointer-events: none;
 }
-/* блик на булавке */
 .gallery-card::after {
     content: '';
     position: absolute;
@@ -423,8 +419,6 @@ main {
     z-index: 11;
     pointer-events: none;
 }
-
-/* Подпись под карточкой */
 .gallery-meaning {
     font-family: 'Caveat', cursive;
     font-size: 17px;
@@ -432,24 +426,21 @@ main {
     text-align: center;
     margin-top: 10px;
     line-height: 1.25;
-    padding: 0 4px;
     max-width: 180px;
     background: rgba(255,253,246,0.85);
     border-radius: 4px;
     padding: 4px 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.15);
 }
-
-/* Закрытая карточка — тоже прикреплена, но тёмная и со стикером */
 .gallery-card.dark {
     background: #2a1a10;
     border: 2px solid #633207;
     padding: 10px;
     aspect-ratio: 2/3;
     display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 50%, #3a2410 0%, #1a0e05 100%);
 }
 .gallery-card.dark::before {
-    /* такая же булавка, но тёмная */
     content: '';
     position: absolute;
     top: -14px; left: 50%;
@@ -457,10 +448,7 @@ main {
     width: 26px; height: 26px;
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, #6b6b6b 0%, #3a3a3a 45%, #111 100%);
-    box-shadow:
-        0 3px 6px rgba(0,0,0,0.6),
-        inset -2px -2px 4px rgba(0,0,0,0.4),
-        inset 2px 2px 3px rgba(255,255,255,0.25);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.6), inset -2px -2px 4px rgba(0,0,0,0.4), inset 2px 2px 3px rgba(255,255,255,0.25);
     z-index: 10;
     pointer-events: none;
 }
@@ -473,10 +461,8 @@ main {
     text-shadow: 0 0 15px rgba(255,216,77,0.5);
     letter-spacing: 4px;
     z-index: 2;
-    /* убираем прежний блик — используем только для '???' */
 }
-/* заменяем блик у dark на псевдо-элемент через отдельный селектор, чтобы не конфликтовать */
-.gallery-card.dark .sticker {
+.sticker {
     position: absolute;
     top: 8px; right: -18px;
     background: #f4e4c1;
@@ -490,11 +476,6 @@ main {
     z-index: 3;
     letter-spacing: 1px;
     font-weight: 700;
-}
-/* Внутреннее свечение для тёмной карточки */
-.gallery-card.dark {
-    background:
-        radial-gradient(circle at 50% 50%, #3a2410 0%, #1a0e05 100%);
 }
 
 /* ===== ОБО МНЕ ===== */
@@ -557,8 +538,12 @@ main {
 
 /* ===== АДАПТИВ ===== */
 @media (max-width: 768px) {
+    .svg-scene { margin-top: 4px; margin-bottom: 0; }
+    .book-stage { margin-top: -50px; }   /* было -10px */
     header { gap: 22px; padding: 12px 16px; }
     header nav a { font-size: 20px; }
+
+    .svg-scene { margin-top: 10px; margin-bottom: 10px; }
 
     .book-3d { height: auto; aspect-ratio: 3 / 4; max-width: 420px; max-height: 520px; }
     .book-inner { flex-direction: row; }
@@ -580,8 +565,6 @@ main {
     .book-close-btn { width: 34px; height: 34px; font-size: 16px; top: 10px; right: 10px; }
 
     .flight-card { width: 220px; }
-
-    /* Доска на мобильных — меньше отступы */
     .gallery-board { padding: 40px 20px; border-width: 7px; }
     .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 30px 20px; }
     .gallery-card.dark::after { font-size: 24px; }
@@ -589,16 +572,17 @@ main {
     .gallery-meaning { font-size: 15px; max-width: 140px; }
     .gallery-card::before { width: 22px; height: 22px; top: -12px; }
     .gallery-card.dark::before { width: 22px; height: 22px; top: -12px; }
-
     .section h2 { font-size: 32px; }
     .profile-card { padding: 28px 24px; }
-    .svg-scene { max-width: 280px; }
-    .book-stage { margin-top: -30px; }
+    .book-stage { margin-top: -10px; }
 }
 
 @media (max-width: 480px) {
+.svg-scene { max-width: 280px; margin-top: 2px; }
+    .book-stage { margin-top: -40px; }
     header { gap: 14px; }
     header nav a { font-size: 17px; }
+    .svg-scene { max-width: 280px; margin-top: 6px; }
     #bookCover { width: 200px; }
     .book-3d { aspect-ratio: 3 / 4.1; max-width: 360px; max-height: 480px; }
     .book-page { padding: 28px 14px 58px; font-size: 14px; line-height: 1.4; }
@@ -609,12 +593,10 @@ main {
     .page-indicator { font-size: 15px; }
     .book-close-btn { width: 30px; height: 30px; font-size: 14px; top: 8px; right: 8px; }
     .flight-card { width: 180px; }
-
     .gallery-board { padding: 34px 14px; border-width: 6px; }
     .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(95px, 1fr)); gap: 26px 14px; }
     .gallery-card.dark::after { font-size: 20px; letter-spacing: 2px; }
     .gallery-meaning { font-size: 13px; max-width: 110px; }
-
     .profile-avatar { width: 110px; height: 110px; }
     .profile-field input { font-size: 19px; }
 }
@@ -635,7 +617,8 @@ main {
 </header>
 
 <main id="mainView">
-    <div class="svg-scene" id="svgScene">
+    <!-- Тыква: кликабельная, squash-анимация -->
+    <div class="svg-scene" id="svgScene" title="Нажми на меня">
         <img class="frame active" src="ikon1.svg" alt="Кадр 1">
         <img class="frame" src="ikon2.svg" alt="Кадр 2">
         <img class="frame" src="ikon3.svg" alt="Кадр 3">
@@ -687,7 +670,8 @@ main {
 </section>
 
 <script>
-/* ===== SVG ===== */
+/* ===== SVG (плюс клик по тыкве) ===== */
+const svgScene = document.getElementById('svgScene');
 (function svgCycle() {
     const frames = document.querySelectorAll('#svgScene .frame');
     let idx = 0;
@@ -698,8 +682,20 @@ main {
     }, 2000);
 })();
 
+/* Клик по тыкве — squash-анимация «как мячик» */
+let squashCooldown = false;
+svgScene.addEventListener('click', () => {
+    if (squashCooldown) return;
+    squashCooldown = true;
+    svgScene.classList.add('squash');
+    setTimeout(() => {
+        svgScene.classList.remove('squash');
+        squashCooldown = false;
+    }, 850);
+});
+
 /* ===== ГАЛЕРЕЯ: localStorage ===== */
-const STORAGE_KEY = 'book_of_fate_gallery_v4';
+const STORAGE_KEY = 'book_of_fate_gallery_v5';
 const TOTAL_CARDS = 10;
 let cardStates = [];
 
@@ -751,7 +747,7 @@ document.querySelectorAll('header nav a').forEach(a => {
 const MOBILE_BREAKPOINT = 768;
 function isMobile() { return window.innerWidth <= MOBILE_BREAKPOINT; }
 
-/* ===== СТРАНИЦЫ (Сова, Крокодил, Тигр, Овечка) ===== */
+/* ===== СТРАНИЦЫ ===== */
 const pagesData = [
     {
         left: `В давние времена, когда мир был ещё молод, древние силы сплели нити судьбы в единое полотно. Это полотно хранит тайны каждого живого существа. <span class="owl-word" data-img="taro sova.png" data-meaning="Твоя семья завтра сдохнет от бомбардировки">Сова</span> — хранительница этих тайн, она видит то, что скрыто от глаз смертных.`,
@@ -1062,7 +1058,7 @@ function spawnFlyingCard(img, meaning) {
     });
 }
 
-/* ===== ГАЛЕРЕЯ: ВЫСТАВОЧНАЯ ДОСКА ===== */
+/* ===== ГАЛЕРЕЯ — ДОСКА ===== */
 const galleryGrid = document.getElementById('galleryGrid');
 
 function buildGallery() {
@@ -1070,9 +1066,7 @@ function buildGallery() {
     for (let i = 0; i < TOTAL_CARDS; i++) {
         const cell = document.createElement('div');
         cell.className = 'gallery-cell';
-
-        // случайный наклон карточки для живости доски (фиксированный по индексу, чтобы не дёргался при перестройке)
-        const tilt = ((i * 37) % 11) - 5; // от -5 до +5 градусов
+        const tilt = ((i * 37) % 11) - 5;
 
         const state = cardStates[i];
         if (state) {
