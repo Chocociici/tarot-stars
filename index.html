@@ -174,7 +174,6 @@ main {
 .book-page.left-page::after { right: 0; background: linear-gradient(to left, rgba(0,0,0,0.3), transparent); }
 .book-page.right-page::after { left: 0; background: linear-gradient(to right, rgba(0,0,0,0.3), transparent); }
 
-/* Слой, который тянется при перелистывании */
 .flip-page {
     position: absolute;
     top: 0;
@@ -204,7 +203,7 @@ main {
 .flip-page.flip-left { left: 0; transform-origin: right center; }
 
 /* кликабельные слова */
-.owl-word, .croc-word {
+.owl-word, .croc-word, .tiger-word {
     font-weight: 700; cursor: pointer;
     display: inline-block; position: relative;
     font-family: 'Marck Script', cursive;
@@ -214,6 +213,8 @@ main {
 .owl-word:hover { text-shadow: 0 0 22px rgba(255,216,77,1), 0 0 40px rgba(255,216,77,0.8); transform: scale(1.08); }
 .croc-word { color: #7ed957; text-shadow: 0 0 10px rgba(126,217,87,0.7); }
 .croc-word:hover { text-shadow: 0 0 22px rgba(126,217,87,1), 0 0 40px rgba(126,217,87,0.8); transform: scale(1.08); }
+.tiger-word { color: #ff9a3c; text-shadow: 0 0 10px rgba(255,154,60,0.7); }
+.tiger-word:hover { text-shadow: 0 0 22px rgba(255,154,60,1), 0 0 40px rgba(255,154,60,0.8); transform: scale(1.08); }
 
 .book-toolbar {
     position: absolute; bottom: 12px; left: 0; right: 0;
@@ -481,35 +482,48 @@ main {
     border: 1.5px dashed rgba(98,15,129,0.4);
 }
 
-/* ===== АДАПТИВ (книга остаётся ГОРИЗОНТАЛЬНОЙ) ===== */
+/* ===== АДАПТИВ: на мобильных — ОДНА страница ===== */
 @media (max-width: 768px) {
     header { gap: 22px; padding: 12px 16px; }
     header nav a { font-size: 20px; }
 
-    .book-3d { height: 62vw; min-height: 340px; max-height: 460px; }
+    /* Книга становится ОДНОСТРАНИЧНОЙ (квадратной/портретной), а не растянутой */
+    .book-3d {
+        height: auto;
+        aspect-ratio: 3 / 4;
+        max-width: 420px;
+        max-height: 520px;
+    }
     .book-inner { flex-direction: row; }
     .page-slot { height: 100%; flex: 1; }
-    .book-inner::before {
-        left: 50%; right: auto; top: 0; bottom: 0;
-        width: 28px; height: auto;
-        transform: translateX(-50%);
-        background: linear-gradient(to right, rgba(0,0,0,0) 0%, rgba(0,0,0,0.35) 50%, rgba(0,0,0,0) 100%);
+
+    /* На мобильных показываем только одну страницу за раз */
+    .page-slot.left-slot-mobile { flex: 1; }
+    .page-slot.right-slot-mobile { display: none; }
+
+    /* Если страница одна — корешок не нужен */
+    .book-inner::before { display: none; }
+
+    .book-page {
+        padding: 34px 18px 64px;
+        font-size: 17px;
+        line-height: 1.45;
+        border: none !important;
     }
-    .book-page { padding: 32px 14px 58px; font-size: 16px; line-height: 1.45; }
-    .book-page.right-page { border-left: 1px solid rgba(99,50,7,0.4); border-top: none; }
-    .book-page.left-page { border-right: 1px solid rgba(99,50,7,0.4); border-bottom: none; }
-    .book-page.left-page::after { right: 0; left: auto; top: 0; bottom: 0; width: 18px; height: auto; background: linear-gradient(to left, rgba(0,0,0,0.3), transparent); }
-    .book-page.right-page::after { left: 0; right: auto; top: 0; bottom: 0; width: 18px; height: auto; background: linear-gradient(to right, rgba(0,0,0,0.3), transparent); }
+    .book-page::before { inset: 8px; }
+    .book-page.left-page::after,
+    .book-page.right-page::after { display: none; }
 
-    .flip-page { width: 50% !important; height: 100% !important; top: 0 !important; }
-    .flip-page.flip-right { right: 0 !important; left: auto !important; top: 0 !important; transform-origin: left center !important; }
-    .flip-page.flip-left { left: 0 !important; right: auto !important; top: 0 !important; transform-origin: right center !important; }
-    .flip-page .book-page { padding: 32px 14px 58px; font-size: 16px; line-height: 1.45; }
+    /* Перелистывание на мобиле — на всю ширину */
+    .flip-page { width: 100% !important; height: 100% !important; top: 0 !important; left: 0 !important; right: 0 !important; }
+    .flip-page.flip-right { transform-origin: left center !important; }
+    .flip-page.flip-left { transform-origin: right center !important; }
+    .flip-page .book-page { padding: 34px 18px 64px; font-size: 17px; line-height: 1.45; }
 
-    .book-toolbar { padding: 0 12px; bottom: 8px; }
-    .book-toolbar button { width: 36px; height: 36px; font-size: 18px; }
-    .page-indicator { font-size: 16px; }
-    .book-close-btn { width: 32px; height: 32px; font-size: 15px; top: 8px; right: 8px; }
+    .book-toolbar { padding: 0 14px; bottom: 10px; }
+    .book-toolbar button { width: 38px; height: 38px; font-size: 19px; }
+    .page-indicator { font-size: 17px; }
+    .book-close-btn { width: 34px; height: 34px; font-size: 16px; top: 10px; right: 10px; }
 
     .flight-card { width: 220px; }
     .gallery-book { padding: 30px 18px; }
@@ -526,14 +540,14 @@ main {
     header { gap: 14px; }
     header nav a { font-size: 17px; }
     #bookCover { width: 200px; }
-    .book-3d { height: 68vw; min-height: 300px; max-height: 420px; }
-    .book-page { padding: 28px 10px 54px; font-size: 13.5px; line-height: 1.4; }
-    .flip-page .book-page { padding: 28px 10px 54px; font-size: 13.5px; }
+    .book-3d { aspect-ratio: 3 / 4.1; max-width: 360px; max-height: 480px; }
+    .book-page { padding: 28px 14px 58px; font-size: 14px; line-height: 1.4; }
+    .flip-page .book-page { padding: 28px 14px 58px; font-size: 14px; }
     .book-page::before { inset: 6px; }
-    .book-toolbar { padding: 0 8px; bottom: 6px; }
-    .book-toolbar button { width: 32px; height: 32px; font-size: 16px; }
-    .page-indicator { font-size: 14px; }
-    .book-close-btn { width: 28px; height: 28px; font-size: 13px; top: 6px; right: 6px; }
+    .book-toolbar { padding: 0 10px; bottom: 8px; }
+    .book-toolbar button { width: 34px; height: 34px; font-size: 17px; }
+    .page-indicator { font-size: 15px; }
+    .book-close-btn { width: 30px; height: 30px; font-size: 14px; top: 8px; right: 8px; }
     .flight-card { width: 180px; }
     .gallery-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
     .gallery-card.dark::before { font-size: 18px; letter-spacing: 2px; }
@@ -568,8 +582,8 @@ main {
         <div class="book-3d" id="book3d">
             <button class="book-close-btn" id="closeBook" title="Закрыть">✕</button>
             <div class="book-inner">
-                <div class="page-slot" id="slotLeft"></div>
-                <div class="page-slot" id="slotRight"></div>
+                <div class="page-slot left-slot-mobile" id="slotLeft"></div>
+                <div class="page-slot right-slot-mobile" id="slotRight"></div>
             </div>
             <div class="book-toolbar">
                 <button id="prevPage" title="Назад">‹</button>
@@ -620,10 +634,9 @@ main {
     }, 2000);
 })();
 
-/* ===== ГАЛЕРЕЯ: состояние + localStorage ===== */
-const STORAGE_KEY = 'book_of_fate_gallery_v2';
+/* ===== ГАЛЕРЕЯ: localStorage ===== */
+const STORAGE_KEY = 'book_of_fate_gallery_v3';
 const TOTAL_CARDS = 10;
-/* cardStates[i] = null (закрыта) | { img, meaning } (открыта) */
 let cardStates = [];
 
 function loadStates() {
@@ -666,12 +679,17 @@ function showSection(name) {
     else if (name === 'about') aboutView.classList.add('active');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 document.querySelectorAll('header nav a').forEach(a => {
     a.addEventListener('click', () => showSection(a.dataset.section));
 });
 
-/* ===== СТРАНИЦЫ (со словами Сова и Крокодил) ===== */
+/* ===== ОПРЕДЕЛЕНИЕ МОБИЛЬНОГО РЕЖИМА ===== */
+const MOBILE_BREAKPOINT = 768;
+function isMobile() {
+    return window.innerWidth <= MOBILE_BREAKPOINT;
+}
+
+/* ===== СТРАНИЦЫ (Сова, Крокодил, Тигр) ===== */
 const pagesData = [
     {
         left: `В давние времена, когда мир был ещё молод, древние силы сплели нити судьбы в единое полотно. Это полотно хранит тайны каждого живого существа. <span class="owl-word" data-img="taro sova.png" data-meaning="Твоя семья завтра сдохнет от бомбардировки">Сова</span> — хранительница этих тайн, она видит то, что скрыто от глаз смертных.`,
@@ -683,7 +701,7 @@ const pagesData = [
     },
     {
         left: `Третья страница — последняя. Здесь заканчивается путь обычного читателя и начинается путь избранного. Ты дошёл до конца книги, но это только начало твоего пути.`,
-        right: `Помни: судьба не предопределена. Каждый выбор, каждое действие меняет узор на полотне. Используй знания мудро. И запомни: <span class="croc-word" data-img="grimm.png" data-meaning="Крокодил предрекает перемены, которых ты так боялся">Крокодил</span> — не всегда враг.`
+        right: `Помни: судьба не предопределена. Каждый выбор, каждое действие меняет узор на полотне. Используй знания мудро. И запомни: <span class="croc-word" data-img="grimm.png" data-meaning="Крокодил предрекает перемены, которых ты так боялся">Крокодил</span> — не всегда враг. А <span class="tiger-word" data-img="tigr.png" data-meaning="Тигр говорит: полосат, да не кот — иди вперёд, не оглядывайся">Тигр</span> — не всегда кот.`
     }
 ];
 
@@ -710,8 +728,16 @@ function renderPage(container, html, side) {
 }
 
 function renderSpread(idx) {
-    renderPage(slotLeft, pagesData[idx].left, 'left');
-    renderPage(slotRight, pagesData[idx].right, 'right');
+    if (isMobile()) {
+        // На мобильном — только левая "страница", но показываем контент обеих страниц последовательно
+        // Объединяем содержимое левой и правой в одну страницу (по нажатию кнопок тоже листается)
+        const combined = pagesData[idx].left + '<br><br>' + pagesData[idx].right;
+        renderPage(slotLeft, combined, 'left');
+        slotRight.innerHTML = '';
+    } else {
+        renderPage(slotLeft, pagesData[idx].left, 'left');
+        renderPage(slotRight, pagesData[idx].right, 'right');
+    }
     bindClickWords();
     pageIndicator.textContent = `${idx + 1} / ${pagesData.length}`;
     prevBtn.disabled = idx === 0;
@@ -719,7 +745,7 @@ function renderSpread(idx) {
 }
 
 function bindClickWords() {
-    document.querySelectorAll('.owl-word, .croc-word').forEach(word => {
+    document.querySelectorAll('.owl-word, .croc-word, .tiger-word').forEach(word => {
         if (word.dataset.bound) return;
         word.dataset.bound = '1';
         word.addEventListener('click', triggerWord);
@@ -747,19 +773,24 @@ function closeBook() {
 bookCover.addEventListener('click', openBook);
 closeBookBtn.addEventListener('click', closeBook);
 
-/* ===== ФИЗИЧНОЕ ПЕРЕЛИСТЫВАНИЕ — ТЯНЕТСЯ ТОЛЬКО ПОЛОВИНА ===== */
+/* при изменении размера — перерисовать текущий разворот */
+window.addEventListener('resize', () => {
+    if (bookOpened) renderSpread(currentSpread);
+});
+
+/* ===== ПЕРЕЛИСТЫВАНИЕ ===== */
 let dragState = null;
 
 function onDragStart(e) {
     if (isAnimating) return;
     if (e.target.closest('button')) return;
-    if (e.target.closest('.owl-word, .croc-word')) return;
+    if (e.target.closest('.owl-word, .croc-word, .tiger-word')) return;
     if (!book3d.classList.contains('visible')) return;
 
     const rect = book3d.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const half = rect.width / 2;
-    const side = x > half ? 'right' : 'left';
+    const side = isMobile() ? 'right' : (x > half ? 'right' : 'left');
 
     if (side === 'right' && currentSpread >= pagesData.length - 1) return;
     if (side === 'left' && currentSpread <= 0) return;
@@ -786,7 +817,7 @@ function onDragMove(e) {
     }
     if (!dragState.dragging) return;
 
-    const W = book3d.getBoundingClientRect().width / 2;
+    const W = book3d.getBoundingClientRect().width / (isMobile() ? 1 : 2);
     let angle;
     if (dragState.side === 'right') angle = Math.max(-180, Math.min(0, (dx / W) * 180));
     else angle = Math.max(0, Math.min(180, (dx / W) * 180));
@@ -834,7 +865,7 @@ function goNext() {
     isAnimating = true;
     const flip = document.createElement('div');
     flip.className = 'flip-page flip-right';
-    flip.innerHTML = slotRight.innerHTML;
+    flip.innerHTML = isMobile() ? slotLeft.innerHTML : slotRight.innerHTML;
     book3d.appendChild(flip);
     requestAnimationFrame(() => {
         flip.style.transition = 'transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.7s';
@@ -853,7 +884,7 @@ function goPrev() {
     isAnimating = true;
     const flip = document.createElement('div');
     flip.className = 'flip-page flip-left';
-    flip.innerHTML = slotLeft.innerHTML;
+    flip.innerHTML = isMobile() ? slotLeft.innerHTML : slotLeft.innerHTML;
     book3d.appendChild(flip);
     requestAnimationFrame(() => {
         flip.style.transition = 'transform 0.7s cubic-bezier(0.645, 0.045, 0.355, 1), opacity 0.7s';
@@ -870,17 +901,19 @@ function goPrev() {
 nextBtn.addEventListener('click', goNext);
 prevBtn.addEventListener('click', goPrev);
 
-/* ===== КЛИК ПО СЛОВУ (Сова / Крокодил) ===== */
-let cardSpawned = false;
+/* ===== КЛИК ПО СЛОВУ (Сова / Крокодил / Тигр) ===== */
 function triggerWord(e) {
     e.stopPropagation();
     const word = e.currentTarget;
     const img = word.dataset.img;
     const meaning = word.dataset.meaning;
-    const color = word.classList.contains('croc-word') ? '#7ed957' : '#ffd84d';
+    let color = '#ffd84d';
+    if (word.classList.contains('croc-word')) color = '#7ed957';
+    else if (word.classList.contains('tiger-word')) color = '#ff9a3c';
 
     if (isCardUnlocked(img)) return;
 
+    // звёзды
     const rect = word.getBoundingClientRect();
     const cx = rect.left + rect.width / 2;
     const cy = rect.top + rect.height / 2;
@@ -904,14 +937,16 @@ function triggerWord(e) {
         ], { duration: 900 + Math.random() * 600, easing: 'cubic-bezier(0.15, 0.6, 0.4, 1)', fill: 'forwards' });
         setTimeout(() => star.remove(), 1700);
     }
-    if (!cardSpawned) {
-        cardSpawned = true;
-        setTimeout(() => spawnFlyingCard(img, meaning), 300);
-    }
+
+    // карта — без глобального флага, каждая карта запускается независимо
+    setTimeout(() => spawnFlyingCard(img, meaning), 300);
 }
 
 /* ===== КАРТА (та же анимация + 3D-просмотр) ===== */
 function spawnFlyingCard(img, meaning) {
+    // если уже есть открытая карта — не плодим
+    if (document.querySelector('.card-flight-overlay')) return;
+
     const overlay = document.createElement('div');
     overlay.className = 'card-flight-overlay';
 
@@ -938,7 +973,6 @@ function spawnFlyingCard(img, meaning) {
         card.classList.add('settled');
     }, 2600);
 
-    /* 3D-просмотр */
     card.addEventListener('pointermove', (ev) => {
         if (!card.classList.contains('settled')) return;
         const r = card.getBoundingClientRect();
@@ -957,10 +991,8 @@ function spawnFlyingCard(img, meaning) {
         overlay.style.transition = 'opacity 0.4s';
         overlay.style.opacity = '0';
         setTimeout(() => overlay.remove(), 400);
-        cardSpawned = false;
     }
 
-    /* любое закрытие = добавление в галерею */
     function unlockAndClose(goToGallery) {
         unlockCard(img, meaning);
         removeOverlay();
@@ -974,7 +1006,7 @@ function spawnFlyingCard(img, meaning) {
     });
 }
 
-/* ===== ГАЛЕРЕЯ: все 10 слотов ===== */
+/* ===== ГАЛЕРЕЯ ===== */
 const galleryGrid = document.getElementById('galleryGrid');
 
 function buildGallery() {
